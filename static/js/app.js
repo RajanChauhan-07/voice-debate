@@ -1359,10 +1359,21 @@ function DebaterScoreCard({ playerEval, isWinner, isCurrent, side }) {
             </div>
 
             {/* Mandatory Vocabulary Bonus */}
-            <div className="p-3 rounded-xl bg-black/[0.02] border border-black/[0.06] mb-5 flex items-center justify-between text-xs font-mono-sf">
+            <div className="p-3 rounded-xl bg-black/[0.02] border border-black/[0.06] mb-3 flex items-center justify-between text-xs font-mono-sf">
                 <span className="text-[#86868b]">Vocabulary Hints Used:</span>
                 <span className="text-[#1d1d1f] font-semibold">
                     +{playerEval.hints_used_count || 0} words ({eb.hint_bonus ? `+${eb.hint_bonus} pts` : '+0 pts'})
+                </span>
+            </div>
+
+            {/* Trained ML Speech Model Accreditation */}
+            <div className="p-2.5 rounded-xl bg-black/[0.03] border border-black/[0.08] mb-5 flex items-center justify-between text-[11px] font-mono-sf">
+                <span className="text-[#86868b] flex items-center space-x-1">
+                    <span>🎙️</span>
+                    <span>Speech ML Level:</span>
+                </span>
+                <span className="text-[#1d1d1f] font-semibold">
+                    {playerEval.speech_ml ? playerEval.speech_ml.cefr_level : 'B2 (Upper Interm)'}
                 </span>
             </div>
 

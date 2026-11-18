@@ -19,6 +19,7 @@ from server.db import (
 )
 from server.matchmaking import MatchmakingManager
 from server.topics import DEFAULT_TOPICS
+from server.speech_scoring import get_models_metadata, predict_speech_scores
 
 app = FastAPI(title="VoiceDebate Arena API", version="1.0.0")
 
@@ -98,6 +99,21 @@ def fetch_user_matches(user_id: str):
 @app.get("/api/topics/sample")
 def fetch_topics_sample():
     return DEFAULT_TOPICS
+
+class SpeechScoreRequest(BaseModel):
+    transcript: str
+    duration_sec: Optional[float] = 45.0
+    pause_ratio: Optional[float] = None
+
+@app.get("/api/models/status")
+def get_models_status():
+    return get_models_metadata()
+
+@app.post("/api/models/predict")
+def predict_speech_endpoint(req: SpeechScoreRequest):
+    if not req.transcript:
+        raise HTTPException(status_code=400, detail="Transcript is required")
+    return predict_speech_scores(req.transcript, req.duration_sec, req.pause_ratio)
 
 # WebSocket Endpoint
 @app.websocket("/ws")

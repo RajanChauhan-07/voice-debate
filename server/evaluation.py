@@ -4,6 +4,7 @@ import math
 import httpx
 from typing import Dict, Any, List, Optional
 from server.config import GEMINI_API_KEY, GROQ_API_KEY
+from server.speech_scoring import predict_speech_scores
 
 def calculate_elo(rating_a: int, rating_b: int, winner: Optional[str]) -> tuple[int, int]:
     """
@@ -82,16 +83,10 @@ def rubric_evaluate_speech(
     vocab_score = 75 + int(ttr * 20) + (hints_used * 2)
     vocab_score = min(98, max(65, vocab_score))
 
-    # 3. Fluency: based on pace (approx 100-140 words is optimal for two 45s turns)
-    fluency_score = 78
-    if word_count >= 50:
-        fluency_score += 10
-    if word_count >= 90:
-        fluency_score += 6
-    fluency_score = min(95, fluency_score)
-
-    # 4. Clarity: baseline high for clear structured sentences
-    clarity_score = 84
+    # 3 & 4. Fluency & Pronunciation (Powered by Trained Speech Models: GBR, BiLSTM & Transformer)
+    speech_ml = predict_speech_scores(full_text, duration_sec=90.0)
+    fluency_score = int(round(speech_ml["fluency_score"]))
+    clarity_score = int(round(speech_ml["pronunciation_score"]))
 
     # Weighted English proficiency
     english_score = round(
@@ -194,7 +189,9 @@ def rubric_evaluate_speech(
             "closing_summary": closing_score
         },
         "grammar_corrections": grammar_corrections,
-        "suggestions": suggestions
+        "suggestions": suggestions,
+        "speech_ml": speech_ml,
+        "ml_models_active": True
     }
 
 async def evaluate_debate(
