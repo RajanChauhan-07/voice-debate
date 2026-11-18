@@ -302,3 +302,4 @@ class DebateRoom:
         self.is_active = False
         if self.timer_task and not self.timer_task.done():
             self.timer_task.cancel()
+

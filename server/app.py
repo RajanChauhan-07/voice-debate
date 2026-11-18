@@ -182,3 +182,4 @@ def serve_root():
     if index_path.exists():
         return FileResponse(index_path)
     return {"message": "VoiceDebate Arena server is running. Frontend static assets loading..."}
+

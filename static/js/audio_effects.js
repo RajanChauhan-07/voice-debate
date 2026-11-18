@@ -148,3 +148,4 @@ class SoundEffectsManager {
 }
 
 window.soundFx = new SoundEffectsManager();
+

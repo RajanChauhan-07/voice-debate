@@ -83,9 +83,9 @@ class MatchmakingManager:
         self.leave_queue(user["id"])
 
         bot_names = [
-            ("usr-bot-marcus", "Marcus (Debate Pro)", 1350, "#8B5CF6"),
-            ("usr-bot-sophia", "Sophia (Oxford Finalist)", 1410, "#EC4899"),
-            ("usr-bot-david", "David (Cambridge Union)", 1280, "#10B981")
+            ("usr-bot-marcus", "Marcus (Debate Pro)", 1350, "#2c2c2e"),
+            ("usr-bot-sophia", "Sophia (Oxford Finalist)", 1410, "#242426"),
+            ("usr-bot-david", "David (Cambridge Union)", 1280, "#3a3a3c")
         ]
         b_id, b_name, b_rating, b_color = random.choice(bot_names)
         bot_player = {
@@ -138,3 +138,4 @@ class MatchmakingManager:
                             "type": "opponent_disconnected",
                             "message": "Opponent temporarily lost connection."
                         })
+

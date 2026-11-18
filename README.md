@@ -181,3 +181,4 @@ Output:
 | `TOPIC_REVEAL_DURATION_SECONDS` | `6` | Duration of motion reveal phase |
 
 *Note: VoiceDebate Arena is 100% functional out-of-the-box even without an external API key thanks to the built-in deterministic NLP debate rubric.*
+

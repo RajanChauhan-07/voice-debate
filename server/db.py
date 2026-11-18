@@ -69,16 +69,19 @@ def init_db():
     count = cursor.fetchone()["count"]
     if count == 0:
         seed_users = [
-            ("usr-sophia", "sophia_c", "Sophia Chen", 1485, 24, 3, 27, 93.5, 95.0, "#EC4899"),
-            ("usr-marcus", "marcus_v", "Marcus Vance", 1420, 19, 5, 24, 89.2, 91.4, "#8B5CF6"),
-            ("usr-elena", "elena_r", "Elena Rostova", 1365, 15, 6, 21, 91.0, 87.8, "#3B82F6"),
-            ("usr-david", "david_k", "David Kim", 1290, 11, 7, 18, 86.4, 85.0, "#10B981"),
-            ("usr-zara", "zara_m", "Zara Malik", 1245, 9, 8, 17, 84.1, 83.6, "#F59E0B"),
+            ("usr-sophia", "sophia_c", "Sophia Chen", 1485, 24, 3, 27, 93.5, 95.0, "#2c2c2e"),
+            ("usr-marcus", "marcus_v", "Marcus Vance", 1420, 19, 5, 24, 89.2, 91.4, "#242426"),
+            ("usr-elena", "elena_r", "Elena Rostova", 1365, 15, 6, 21, 91.0, 87.8, "#3a3a3c"),
+            ("usr-david", "david_k", "David Kim", 1290, 11, 7, 18, 86.4, 85.0, "#1c1c1e"),
+            ("usr-zara", "zara_m", "Zara Malik", 1245, 9, 8, 17, 84.1, 83.6, "#2c2c2e"),
         ]
         cursor.executemany("""
             INSERT INTO users (id, username, display_name, rating, matches_won, matches_lost, total_debates, avg_english_score, avg_debate_score, avatar_color)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, seed_users)
+
+    # Normalize any existing colorful avatars to sleek dark monochrome
+    cursor.execute("UPDATE users SET avatar_color = '#2c2c2e' WHERE avatar_color LIKE '#%' AND avatar_color NOT IN ('#2c2c2e', '#242426', '#3a3a3c', '#1c1c1e')")
 
     conn.commit()
     conn.close()
@@ -96,7 +99,7 @@ def get_or_create_user(username: str, display_name: Optional[str] = None) -> Dic
 
     user_id = f"usr-{uuid.uuid4().hex[:8]}"
     d_name = display_name or username.capitalize()
-    colors = ["#3B82F6", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B", "#06B6D4"]
+    colors = ["#2c2c2e", "#242426", "#3a3a3c", "#1c1c1e"]
     import random
     avatar_color = random.choice(colors)
 
@@ -217,3 +220,4 @@ def get_user_matches(user_id: str, limit: int = 10) -> List[Dict[str, Any]]:
     rows = [dict(r) for r in cursor.fetchall()]
     conn.close()
     return rows
+

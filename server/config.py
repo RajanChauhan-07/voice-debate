@@ -18,3 +18,4 @@ TOPIC_REVEAL_DURATION_SECONDS = int(os.getenv("TOPIC_REVEAL_DURATION_SECONDS", 6
 
 DB_PATH = BASE_DIR / "data" / "debate.db"
 DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+

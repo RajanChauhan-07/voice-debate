@@ -123,3 +123,4 @@ async def get_debate_topic() -> Dict[str, Any]:
     selected = random.choice(DEFAULT_TOPICS).copy()
     # Ensure fresh random copy
     return selected
+
