@@ -1,4 +1,4 @@
-// VoiceDebate Arena - Apple Minimalist Aesthetic (Pure Black & White / Grayscale)
+// VoiceDebate Arena - Apple Minimalist Aesthetic (Pure White / Light Mode)
 const { useState, useEffect, useRef } = React;
 
 function VoiceDebateApp() {
@@ -357,17 +357,17 @@ function VoiceDebateApp() {
     }, [screen]);
 
     return (
-        <div className="min-h-screen bg-black text-[#f5f5f7] flex flex-col justify-between font-sf selection:bg-white selection:text-black">
-            {/* Apple Minimalist Navigation Bar */}
-            <header className="border-b border-white/[0.08] apple-glass px-6 py-3.5 flex items-center justify-between sticky top-0 z-50">
+        <div className="min-h-screen bg-[#fbfbfd] text-[#1d1d1f] flex flex-col justify-between font-sf selection:bg-black selection:text-white">
+            {/* Apple Minimalist Navigation Bar (Light Mode) */}
+            <header className="border-b border-black/[0.08] apple-glass px-6 py-3.5 flex items-center justify-between sticky top-0 z-50">
                 <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setScreen('LOBBY')}>
-                    <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-bold text-xs tracking-tight">
-                        <svg className="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-sm">
+                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
                         </svg>
                     </div>
                     <div>
-                        <div className="text-sm font-semibold tracking-tight text-white">
+                        <div className="text-sm font-semibold tracking-tight text-[#1d1d1f]">
                             VoiceDebate
                         </div>
                     </div>
@@ -390,14 +390,14 @@ function VoiceDebateApp() {
                     </button>
 
                     {/* User profile dropdown pill */}
-                    <div className="flex items-center space-x-2.5 bg-white/[0.04] border border-white/[0.08] rounded-full px-3 py-1">
-                        <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-semibold text-white">
+                    <div className="flex items-center space-x-2.5 bg-black/[0.04] border border-black/[0.08] rounded-full px-3 py-1">
+                        <div className="w-5 h-5 rounded-full bg-black text-white flex items-center justify-center text-[10px] font-semibold">
                             {user.display_name.charAt(0)}
                         </div>
-                        <div className="text-xs text-neutral-300 font-medium">
+                        <div className="text-xs text-[#1d1d1f] font-medium">
                             {user.display_name}
                         </div>
-                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/10 text-white font-mono-sf">
+                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-black/5 text-[#1d1d1f] font-mono-sf font-semibold">
                             {user.rating}
                         </span>
 
@@ -422,7 +422,7 @@ function VoiceDebateApp() {
                                     });
                                 }
                             }}
-                            className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 text-neutral-400 hover:text-white transition"
+                            className="text-[10px] px-2 py-0.5 rounded-full bg-black/[0.06] hover:bg-black/10 text-[#86868b] hover:text-[#1d1d1f] transition"
                         >
                             Switch
                         </button>
@@ -520,7 +520,7 @@ function VoiceDebateApp() {
             )}
 
             {/* Apple Minimalist Footer */}
-            <footer className="border-t border-white/[0.06] py-5 text-center text-xs text-[#86868b]">
+            <footer className="border-t border-black/[0.08] py-5 text-center text-xs text-[#86868b]">
                 VoiceDebate · Real-Time 1v1 Argumentation & Adjudication
             </footer>
         </div>
@@ -528,18 +528,18 @@ function VoiceDebateApp() {
 }
 
 // -------------------------------------------------------------
-// STEP 01: LOBBY SCREEN (Apple Minimalist Hero)
+// STEP 01: LOBBY SCREEN (Apple Light Mode Hero)
 // -------------------------------------------------------------
 function LobbyScreen({ user, onStartMatch, onStartPractice }) {
     return (
         <div className="flex flex-col items-center justify-center py-6 md:py-10 text-center">
-            {/* Minimalist Pill */}
+            {/* Minimalist Light Pill */}
             <div className="apple-pill mb-8">
                 Step 01 · 1v1 Competitive Debate
             </div>
 
             {/* Headline */}
-            <h1 className="text-5xl md:text-7xl font-semibold tracking-[-0.03em] leading-[1.08] text-white max-w-3xl mb-4">
+            <h1 className="text-5xl md:text-7xl font-semibold tracking-[-0.03em] leading-[1.08] text-[#1d1d1f] max-w-3xl mb-4">
                 Speak with conviction.<br />
                 <span className="text-[#86868b]">Out-debate in real time.</span>
             </h1>
@@ -549,11 +549,11 @@ function LobbyScreen({ user, onStartMatch, onStartPractice }) {
                 Four 45-second turns under time pressure. Spoken live over real-time audio. Scored on argumentation and English mastery.
             </p>
 
-            {/* Apple Start Match Pill Button */}
+            {/* Apple Solid Black "Start Match" Pill Button */}
             <div className="flex flex-col items-center space-y-4 mb-14">
                 <button
                     onClick={onStartMatch}
-                    className="apple-btn-primary !px-10 !py-4 !text-base shadow-2xl shadow-white/5"
+                    className="apple-btn-primary !px-10 !py-4 !text-base shadow-xl shadow-black/10"
                 >
                     Start Match
                 </button>
@@ -592,9 +592,9 @@ function LobbyScreen({ user, onStartMatch, onStartPractice }) {
                     <div key={idx} className="apple-glass-card p-4">
                         <div className="flex items-center justify-between text-xs font-mono-sf text-[#86868b] mb-1.5">
                             <span>TURN {item.turn}</span>
-                            <span className="text-white/60">{item.time}</span>
+                            <span className="text-[#1d1d1f] font-medium">{item.time}</span>
                         </div>
-                        <div className="text-sm font-semibold text-white tracking-tight">{item.title}</div>
+                        <div className="text-sm font-semibold text-[#1d1d1f] tracking-tight">{item.title}</div>
                         <div className="text-xs text-[#86868b] mt-1">{item.speaker}</div>
                     </div>
                 ))}
@@ -604,22 +604,22 @@ function LobbyScreen({ user, onStartMatch, onStartPractice }) {
 }
 
 // -------------------------------------------------------------
-// STEP 01 (ACTIVE): MATCHING SCREEN (Delicate Monochrome Radar)
+// STEP 01 (ACTIVE): MATCHING SCREEN (Light Mode Minimalist Radar)
 // -------------------------------------------------------------
 function MatchingScreen({ user, onCancel, onStartPractice }) {
     return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-            {/* Minimalist Radar Rings */}
+            {/* Minimalist Light Radar Rings */}
             <div className="relative w-56 h-56 mb-8 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full border border-white/[0.08]"></div>
-                <div className="absolute inset-8 rounded-full border border-white/[0.12]"></div>
-                <div className="absolute inset-16 rounded-full border border-white/[0.16]"></div>
+                <div className="absolute inset-0 rounded-full border border-black/[0.06]"></div>
+                <div className="absolute inset-8 rounded-full border border-black/[0.08]"></div>
+                <div className="absolute inset-16 rounded-full border border-black/[0.12]"></div>
                 
-                {/* Subtle Monochrome Pulse */}
-                <div className="absolute inset-0 rounded-full bg-white/[0.04] apple-radar-wave"></div>
+                {/* Subtle Pulse */}
+                <div className="absolute inset-0 rounded-full bg-black/[0.03] apple-radar-wave"></div>
 
                 {/* Center User Dot */}
-                <div className="relative z-10 w-16 h-16 rounded-full bg-[#1c1c1e] border border-white/20 flex items-center justify-center text-xl font-semibold text-white shadow-xl">
+                <div className="relative z-10 w-16 h-16 rounded-full bg-black text-white flex items-center justify-center text-xl font-semibold shadow-md">
                     {user.display_name.charAt(0)}
                 </div>
             </div>
@@ -627,7 +627,7 @@ function MatchingScreen({ user, onCancel, onStartPractice }) {
             <div className="apple-pill mb-3">
                 Step 01 · Finding Opponent
             </div>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-white mb-2">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-[#1d1d1f] mb-2">
                 Connecting to live debater...
             </h2>
             <p className="text-sm text-[#86868b] max-w-sm mb-8 font-normal">
@@ -637,7 +637,7 @@ function MatchingScreen({ user, onCancel, onStartPractice }) {
             <div className="flex items-center space-x-3">
                 <button
                     onClick={onCancel}
-                    className="apple-btn-secondary !text-neutral-400 hover:!text-white"
+                    className="apple-btn-secondary !text-[#86868b] hover:!text-[#1d1d1f]"
                 >
                     Cancel
                 </button>
@@ -654,14 +654,13 @@ function MatchingScreen({ user, onCancel, onStartPractice }) {
 }
 
 // -------------------------------------------------------------
-// STEP 02 & STEP 03: MATCH FOUND & TOPIC REVEAL
+// STEP 02 & STEP 03: MATCH FOUND & TOPIC REVEAL (Light Mode)
 // -------------------------------------------------------------
 function MatchFoundScreen({ playerA, playerB, topic, mandatoryVocabulary, currentUserId }) {
     if (!playerA || !playerB) return null;
 
     return (
         <div className="flex flex-col items-center justify-center py-6 text-center max-w-3xl mx-auto w-full">
-            {/* Minimalist Pill */}
             <div className="apple-pill mb-8">
                 Step 02 & 03 · Match Locked & Motion Ready
             </div>
@@ -670,16 +669,16 @@ function MatchFoundScreen({ playerA, playerB, topic, mandatoryVocabulary, curren
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center w-full mb-8">
                 {/* Player A Card */}
                 <div className={`apple-glass-card p-6 text-center ${playerA.id === currentUserId ? 'apple-glass-card-active' : ''}`}>
-                    <div className="w-14 h-14 rounded-full bg-[#1c1c1e] border border-white/20 mx-auto mb-3 flex items-center justify-center text-lg font-semibold text-white">
+                    <div className="w-14 h-14 rounded-full bg-black text-white mx-auto mb-3 flex items-center justify-center text-lg font-semibold shadow-sm">
                         {playerA.display_name.charAt(0)}
                     </div>
-                    <div className="text-base font-semibold text-white tracking-tight">{playerA.display_name}</div>
+                    <div className="text-base font-semibold text-[#1d1d1f] tracking-tight">{playerA.display_name}</div>
                     <div className="text-xs font-mono-sf text-[#86868b] mt-1">{playerA.rating} Elo</div>
-                    <div className="mt-3 inline-block px-3 py-1 rounded-full bg-white text-black text-xs font-semibold">
+                    <div className="mt-3 inline-block px-3 py-1 rounded-full bg-black text-white text-xs font-semibold">
                         FOR
                     </div>
                     {playerA.id === currentUserId && (
-                        <div className="text-[10px] uppercase tracking-wider text-white/50 font-mono-sf mt-2">You</div>
+                        <div className="text-[10px] uppercase tracking-wider text-[#86868b] font-mono-sf mt-2">You</div>
                     )}
                 </div>
 
@@ -692,16 +691,16 @@ function MatchFoundScreen({ playerA, playerB, topic, mandatoryVocabulary, curren
 
                 {/* Player B Card */}
                 <div className={`apple-glass-card p-6 text-center ${playerB.id === currentUserId ? 'apple-glass-card-active' : ''}`}>
-                    <div className="w-14 h-14 rounded-full bg-[#1c1c1e] border border-white/20 mx-auto mb-3 flex items-center justify-center text-lg font-semibold text-white">
+                    <div className="w-14 h-14 rounded-full bg-black text-white mx-auto mb-3 flex items-center justify-center text-lg font-semibold shadow-sm">
                         {playerB.display_name.charAt(0)}
                     </div>
-                    <div className="text-base font-semibold text-white tracking-tight">{playerB.display_name}</div>
+                    <div className="text-base font-semibold text-[#1d1d1f] tracking-tight">{playerB.display_name}</div>
                     <div className="text-xs font-mono-sf text-[#86868b] mt-1">{playerB.rating} Elo</div>
-                    <div className="mt-3 inline-block px-3 py-1 rounded-full bg-white/10 text-white border border-white/20 text-xs font-semibold">
+                    <div className="mt-3 inline-block px-3 py-1 rounded-full bg-black/[0.06] text-[#1d1d1f] border border-black/10 text-xs font-semibold">
                         AGAINST
                     </div>
                     {playerB.id === currentUserId && (
-                        <div className="text-[10px] uppercase tracking-wider text-white/50 font-mono-sf mt-2">You</div>
+                        <div className="text-[10px] uppercase tracking-wider text-[#86868b] font-mono-sf mt-2">You</div>
                     )}
                 </div>
             </div>
@@ -718,7 +717,7 @@ function MatchFoundScreen({ playerA, playerB, topic, mandatoryVocabulary, curren
                         </span>
                     </div>
 
-                    <h3 className="text-xl md:text-2xl font-semibold tracking-tight text-white mb-2">
+                    <h3 className="text-xl md:text-2xl font-semibold tracking-tight text-[#1d1d1f] mb-2">
                         "{topic.motion}"
                     </h3>
                     <p className="text-sm text-[#86868b] mb-6 leading-relaxed">
@@ -726,9 +725,9 @@ function MatchFoundScreen({ playerA, playerB, topic, mandatoryVocabulary, curren
                     </p>
 
                     {/* 5 Mandatory Vocabulary Hints */}
-                    <div className="border-t border-white/[0.08] pt-5">
+                    <div className="border-t border-black/[0.08] pt-5">
                         <div className="flex items-center justify-between mb-3 text-xs">
-                            <span className="font-medium text-white/90">
+                            <span className="font-medium text-[#1d1d1f]">
                                 Mandatory Vocabulary Hints
                             </span>
                             <span className="text-[#86868b] font-mono-sf">
@@ -739,7 +738,7 @@ function MatchFoundScreen({ playerA, playerB, topic, mandatoryVocabulary, curren
                             {mandatoryVocabulary.map((word, idx) => (
                                 <span
                                     key={idx}
-                                    className="px-3.5 py-1.5 rounded-full bg-white/[0.06] border border-white/15 text-white/90 text-xs font-medium font-mono-sf"
+                                    className="px-3.5 py-1.5 rounded-full bg-black/[0.04] border border-black/10 text-[#1d1d1f] text-xs font-medium font-mono-sf"
                                 >
                                     {word}
                                 </span>
@@ -753,7 +752,7 @@ function MatchFoundScreen({ playerA, playerB, topic, mandatoryVocabulary, curren
 }
 
 // -------------------------------------------------------------
-// STEP 04: COIN TOSS SCREEN (Apple Brushed Titanium Token)
+// STEP 04: COIN TOSS SCREEN (Apple Aluminum Token)
 // -------------------------------------------------------------
 function CoinTossScreen({ winnerKey, playerA, playerB }) {
     const firstSpeaker = winnerKey === 'player_a' ? playerA : playerB;
@@ -764,21 +763,21 @@ function CoinTossScreen({ winnerKey, playerA, playerB }) {
                 Step 04 · Coin Toss
             </div>
 
-            {/* Minimalist Titanium Coin */}
+            {/* Minimalist Aluminum Coin */}
             <div className="coin-container mb-8">
                 <div className="coin flipping">
                     <div className="coin-face coin-front">
                         <span className="text-xs font-mono-sf tracking-widest text-[#86868b]">FIRST</span>
-                        <span className="text-2xl font-bold text-white mt-1">A</span>
+                        <span className="text-2xl font-bold text-[#1d1d1f] mt-1">A</span>
                     </div>
                     <div className="coin-face coin-back">
                         <span className="text-xs font-mono-sf tracking-widest text-[#86868b]">FIRST</span>
-                        <span className="text-2xl font-bold text-white mt-1">B</span>
+                        <span className="text-2xl font-bold text-[#1d1d1f] mt-1">B</span>
                     </div>
                 </div>
             </div>
 
-            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-white mb-2">
+            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#1d1d1f] mb-2">
                 {firstSpeaker ? firstSpeaker.display_name : 'Player A'} speaks first
             </h2>
             <p className="text-[#86868b] max-w-sm text-sm font-normal">
@@ -789,7 +788,7 @@ function CoinTossScreen({ winnerKey, playerA, playerB }) {
 }
 
 // -------------------------------------------------------------
-// STEP 05: LIVE DEBATE ARENA (Clean Minimalist Stage)
+// STEP 05: LIVE DEBATE ARENA (Apple Light Mode Stage)
 // -------------------------------------------------------------
 function DebateArenaScreen({
     playerA,
@@ -834,14 +833,14 @@ function DebateArenaScreen({
                     <div className="text-[11px] font-mono-sf text-[#86868b] uppercase tracking-wider mb-1">
                         Motion · {topic ? topic.category : 'General'}
                     </div>
-                    <div className="text-base md:text-lg font-semibold text-white tracking-tight">
+                    <div className="text-base md:text-lg font-semibold text-[#1d1d1f] tracking-tight">
                         "{topic ? topic.motion : 'Competitive Motion'}"
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-2.5 bg-white/[0.04] border border-white/[0.08] px-4 py-2 rounded-full self-start md:self-auto font-mono-sf text-xs">
+                <div className="flex items-center space-x-2.5 bg-black/[0.04] border border-black/[0.08] px-4 py-2 rounded-full self-start md:self-auto font-mono-sf text-xs">
                     <span className="text-[#86868b]">MATCH</span>
-                    <span className="text-white font-semibold">
+                    <span className="text-[#1d1d1f] font-semibold">
                         {formatTime(totalDebateRemaining)}
                     </span>
                 </div>
@@ -857,10 +856,10 @@ function DebateArenaScreen({
                             key={t.index}
                             className={`p-3 rounded-xl border transition-all ${
                                 isActive
-                                    ? 'bg-white/[0.08] border-white/40'
+                                    ? 'bg-black text-white border-black shadow-sm'
                                     : isPast
-                                    ? 'bg-transparent border-white/[0.04] text-white/30'
-                                    : 'bg-transparent border-white/[0.06] text-white/50'
+                                    ? 'bg-white border-black/[0.06] text-neutral-400'
+                                    : 'bg-white border-black/[0.06] text-neutral-500'
                             }`}
                         >
                             <div className="flex items-center justify-between text-[11px] font-mono-sf">
@@ -870,10 +869,10 @@ function DebateArenaScreen({
                                 )}
                                 {isPast && <span>✓</span>}
                             </div>
-                            <div className={`text-xs font-semibold mt-1 tracking-tight ${isActive ? 'text-white' : 'text-neutral-400'}`}>
+                            <div className={`text-xs font-semibold mt-1 tracking-tight ${isActive ? 'text-white' : 'text-[#1d1d1f]'}`}>
                                 {t.name}
                             </div>
-                            <div className="text-[10px] text-[#86868b] mt-0.5">
+                            <div className={`text-[10px] mt-0.5 ${isActive ? 'text-white/70' : 'text-[#86868b]'}`}>
                                 {t.speaker}
                             </div>
                         </div>
@@ -886,18 +885,18 @@ function DebateArenaScreen({
                 {/* Player A Box */}
                 <div
                     className={`apple-glass-card p-5 transition-all ${
-                        isPlayerAActive ? 'apple-speaker-active' : 'opacity-60'
+                        isPlayerAActive ? 'apple-speaker-active' : 'opacity-70'
                     }`}
                 >
                     <div className="flex items-center space-x-3 mb-3">
-                        <div className="w-10 h-10 rounded-full bg-[#1c1c1e] border border-white/20 flex items-center justify-center text-sm font-semibold text-white">
+                        <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-sm font-semibold shadow-sm">
                             {playerA.display_name.charAt(0)}
                         </div>
                         <div>
-                            <div className="text-sm font-semibold text-white tracking-tight flex items-center space-x-1.5">
+                            <div className="text-sm font-semibold text-[#1d1d1f] tracking-tight flex items-center space-x-1.5">
                                 <span>{playerA.display_name}</span>
                                 {playerA.id === currentUserId && (
-                                    <span className="text-[10px] text-neutral-400 font-mono-sf">(You)</span>
+                                    <span className="text-[10px] text-[#86868b] font-mono-sf">(You)</span>
                                 )}
                             </div>
                             <div className="text-xs text-[#86868b] font-mono-sf">SIDE: FOR</div>
@@ -905,13 +904,13 @@ function DebateArenaScreen({
                     </div>
 
                     {isPlayerAActive ? (
-                        <div className="flex items-center space-x-2 text-xs text-white bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+                        <div className="flex items-center space-x-2 text-xs text-white bg-black px-3 py-1.5 rounded-full shadow-sm">
                             <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
                             <span>Speaking</span>
                         </div>
                     ) : (
                         <div className="flex items-center space-x-2 text-xs text-[#86868b] px-3 py-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-neutral-600"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-neutral-400"></span>
                             <span>Listening</span>
                         </div>
                     )}
@@ -925,7 +924,7 @@ function DebateArenaScreen({
                                 cx="50"
                                 cy="50"
                                 r="42"
-                                className="text-white/[0.08] stroke-current"
+                                className="text-black/[0.08] stroke-current"
                                 strokeWidth="4"
                                 fill="transparent"
                             />
@@ -933,7 +932,7 @@ function DebateArenaScreen({
                                 cx="50"
                                 cy="50"
                                 r="42"
-                                className="text-white stroke-current transition-all duration-1000"
+                                className="text-black stroke-current transition-all duration-1000"
                                 strokeWidth="4"
                                 strokeDasharray={264}
                                 strokeDashoffset={264 - (264 * turnTimeRemaining) / 45}
@@ -943,7 +942,7 @@ function DebateArenaScreen({
                         </svg>
 
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-3xl font-semibold font-mono-sf tracking-tight text-white">
+                            <span className="text-3xl font-semibold font-mono-sf tracking-tight text-[#1d1d1f]">
                                 0:{turnTimeRemaining < 10 ? '0' : ''}{turnTimeRemaining}
                             </span>
                             <span className="text-[10px] font-mono-sf uppercase text-[#86868b] mt-0.5">
@@ -956,18 +955,18 @@ function DebateArenaScreen({
                 {/* Player B Box */}
                 <div
                     className={`apple-glass-card p-5 transition-all ${
-                        !isPlayerAActive ? 'apple-speaker-active' : 'opacity-60'
+                        !isPlayerAActive ? 'apple-speaker-active' : 'opacity-70'
                     }`}
                 >
                     <div className="flex items-center space-x-3 mb-3">
-                        <div className="w-10 h-10 rounded-full bg-[#1c1c1e] border border-white/20 flex items-center justify-center text-sm font-semibold text-white">
+                        <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-sm font-semibold shadow-sm">
                             {playerB.display_name.charAt(0)}
                         </div>
                         <div>
-                            <div className="text-sm font-semibold text-white tracking-tight flex items-center space-x-1.5">
+                            <div className="text-sm font-semibold text-[#1d1d1f] tracking-tight flex items-center space-x-1.5">
                                 <span>{playerB.display_name}</span>
                                 {playerB.id === currentUserId && (
-                                    <span className="text-[10px] text-neutral-400 font-mono-sf">(You)</span>
+                                    <span className="text-[10px] text-[#86868b] font-mono-sf">(You)</span>
                                 )}
                             </div>
                             <div className="text-xs text-[#86868b] font-mono-sf">SIDE: AGAINST</div>
@@ -975,27 +974,27 @@ function DebateArenaScreen({
                     </div>
 
                     {!isPlayerAActive ? (
-                        <div className="flex items-center space-x-2 text-xs text-white bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+                        <div className="flex items-center space-x-2 text-xs text-white bg-black px-3 py-1.5 rounded-full shadow-sm">
                             <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
                             <span>Speaking</span>
                         </div>
                     ) : (
                         <div className="flex items-center space-x-2 text-xs text-[#86868b] px-3 py-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-neutral-600"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-neutral-400"></span>
                             <span>Listening</span>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Audio Waveform Canvas (Clean Monochrome) */}
+            {/* Audio Waveform Canvas (Clean Charcoal/Black) */}
             <div className="apple-glass-card p-3">
                 <div className="flex items-center justify-between text-xs font-mono-sf text-[#86868b] mb-2 px-1">
                     <span className="flex items-center space-x-2">
-                        <span className={`w-1.5 h-1.5 rounded-full ${isMyTurn ? 'bg-white' : 'bg-neutral-600'}`}></span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isMyTurn ? 'bg-black' : 'bg-neutral-400'}`}></span>
                         <span>{isMyTurn ? 'Your Audio Input' : "Opponent's Live Audio"}</span>
                     </span>
-                    <span className="text-[10px] text-neutral-500 font-mono-sf">Opus 48kHz</span>
+                    <span className="text-[10px] text-[#86868b] font-mono-sf">Opus 48kHz</span>
                 </div>
                 <canvas ref={visualizerCanvasRef} width={800} height={46} className="waveform-canvas" />
             </div>
@@ -1006,7 +1005,7 @@ function DebateArenaScreen({
                     <span className="text-xs font-mono-sf text-[#86868b] uppercase tracking-wider">
                         Vocabulary Hints
                     </span>
-                    <span className="text-xs font-mono-sf text-white/80">
+                    <span className="text-xs font-mono-sf text-[#1d1d1f] font-medium">
                         Used: {hintsStatus.filter(h => h.used).length} / {hintsStatus.length}
                     </span>
                 </div>
@@ -1017,13 +1016,13 @@ function DebateArenaScreen({
                             key={idx}
                             className={`px-3 py-1 rounded-full text-xs font-mono-sf transition-all ${
                                 hint.used
-                                    ? 'bg-white text-black font-semibold'
-                                    : 'bg-white/[0.04] border border-white/10 text-neutral-400'
+                                    ? 'bg-black text-white font-semibold shadow-sm'
+                                    : 'bg-black/[0.04] border border-black/10 text-neutral-600'
                             }`}
                         >
                             <span>{hint.used ? '✓ ' : ''}</span>
                             <span>{hint.word}</span>
-                            {hint.used && <span className="ml-1 text-[10px] text-neutral-600">(+2)</span>}
+                            {hint.used && <span className="ml-1 text-[10px] text-neutral-300">(+2)</span>}
                         </div>
                     ))}
                 </div>
@@ -1036,7 +1035,7 @@ function DebateArenaScreen({
                     <span>{isMyTurn ? 'Active Input' : 'Incoming Stream'}</span>
                 </div>
 
-                <div className="min-h-[80px] p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] text-white/90 text-sm leading-relaxed font-normal">
+                <div className="min-h-[80px] p-4 rounded-xl bg-black/[0.02] border border-black/[0.06] text-[#1d1d1f] text-sm leading-relaxed font-normal">
                     {liveTranscript ? (
                         <span>
                             {liveTranscript.split(' ').map((word, wIdx) => {
@@ -1045,7 +1044,7 @@ function DebateArenaScreen({
                                 return (
                                     <span
                                         key={wIdx}
-                                        className={isHint ? 'bg-white text-black font-medium px-1 rounded' : ''}
+                                        className={isHint ? 'bg-black text-white font-medium px-1.5 py-0.5 rounded' : ''}
                                     >
                                         {word}{' '}
                                     </span>
@@ -1097,7 +1096,7 @@ function DebateArenaScreen({
 }
 
 // -------------------------------------------------------------
-// STEP 06: AI EVALUATION SCREEN (Clean Minimalist Progression)
+// STEP 06: AI EVALUATION SCREEN (Apple Light Mode)
 // -------------------------------------------------------------
 function EvaluatingScreen() {
     const [step, setStep] = useState(1);
@@ -1123,12 +1122,12 @@ function EvaluatingScreen() {
     return (
         <div className="flex flex-col items-center justify-center py-16 text-center max-w-md mx-auto">
             {/* Minimalist Loading Spinner */}
-            <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white animate-spin mb-6"></div>
+            <div className="w-10 h-10 rounded-full border-2 border-black/20 border-t-black animate-spin mb-6"></div>
 
             <div className="apple-pill mb-3">
                 Step 06 · AI Adjudication
             </div>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-white mb-8">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-[#1d1d1f] mb-8">
                 Evaluating debate speeches...
             </h2>
 
@@ -1141,18 +1140,18 @@ function EvaluatingScreen() {
                             key={s.id}
                             className={`p-3.5 rounded-xl border transition-all ${
                                 isCurrent
-                                    ? 'bg-white/[0.06] border-white/30'
+                                    ? 'bg-white border-black/40 shadow-sm'
                                     : isDone
-                                    ? 'bg-white/[0.02] border-white/[0.08] text-white/80'
-                                    : 'bg-transparent border-white/[0.04] text-[#86868b]'
+                                    ? 'bg-white/80 border-black/[0.08] text-[#1d1d1f]'
+                                    : 'bg-transparent border-black/[0.04] text-[#86868b]'
                             }`}
                         >
                             <div className="flex items-center space-x-3">
-                                <div className="text-xs font-mono-sf">
+                                <div className="text-xs font-mono-sf font-semibold">
                                     {isDone ? '✓' : isCurrent ? '○' : '·'}
                                 </div>
                                 <div className="flex-1">
-                                    <div className="text-xs font-semibold text-white tracking-tight">
+                                    <div className="text-xs font-semibold text-[#1d1d1f] tracking-tight">
                                         {s.title}
                                     </div>
                                     <div className="text-[11px] text-[#86868b]">
@@ -1169,7 +1168,7 @@ function EvaluatingScreen() {
 }
 
 // -------------------------------------------------------------
-// STEP 07: RESULTS & SCORECARD (Apple Keynote Layout)
+// STEP 07: RESULTS & SCORECARD (Apple Keynote Light Mode)
 // -------------------------------------------------------------
 function ResultsScreen({ evaluation, turns, topic, currentUserId, onPlayAgain, onBackToLobby }) {
     const pA = evaluation.player_a;
@@ -1193,7 +1192,7 @@ function ResultsScreen({ evaluation, turns, topic, currentUserId, onPlayAgain, o
                     Step 07 · Final Results
                 </div>
 
-                <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-2">
+                <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-[#1d1d1f] mb-2">
                     {isDraw ? 'Debate Ended in a Draw' : `${evaluation.winner_name} Wins`}
                 </h1>
 
@@ -1202,12 +1201,12 @@ function ResultsScreen({ evaluation, turns, topic, currentUserId, onPlayAgain, o
                 </p>
 
                 {myChange && (
-                    <div className="inline-flex items-center space-x-3 bg-white/[0.05] border border-white/10 px-5 py-2 rounded-full font-mono-sf text-xs">
+                    <div className="inline-flex items-center space-x-3 bg-black/[0.04] border border-black/10 px-5 py-2 rounded-full font-mono-sf text-xs">
                         <span className="text-[#86868b]">RATING</span>
-                        <span className="text-white font-semibold">{myChange.old_rating}</span>
-                        <span className="text-neutral-500">→</span>
-                        <span className="text-white font-bold">{myChange.new_rating}</span>
-                        <span className="px-2 py-0.5 rounded-full bg-white text-black font-semibold">
+                        <span className="text-[#1d1d1f] font-semibold">{myChange.old_rating}</span>
+                        <span className="text-neutral-400">→</span>
+                        <span className="text-[#1d1d1f] font-bold">{myChange.new_rating}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-black text-white font-semibold">
                             {myChange.delta >= 0 ? `+${myChange.delta}` : myChange.delta}
                         </span>
                     </div>
@@ -1234,7 +1233,7 @@ function ResultsScreen({ evaluation, turns, topic, currentUserId, onPlayAgain, o
             {/* Grammar Corrections & Feedback Section */}
             <div className="apple-glass-card p-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-semibold text-white tracking-tight">
+                    <h3 className="text-base font-semibold text-[#1d1d1f] tracking-tight">
                         Language & Grammar Analysis
                     </h3>
                     <span className="text-xs text-[#86868b] font-mono-sf">Feedback for {myEval.player_name}</span>
@@ -1242,14 +1241,14 @@ function ResultsScreen({ evaluation, turns, topic, currentUserId, onPlayAgain, o
 
                 <div className="space-y-3 mb-6">
                     {myEval.grammar_corrections && myEval.grammar_corrections.map((corr, idx) => (
-                        <div key={idx} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs">
-                            <div className="flex items-baseline space-x-2 text-neutral-400 mb-1">
+                        <div key={idx} className="p-4 rounded-xl bg-black/[0.02] border border-black/[0.06] text-xs">
+                            <div className="flex items-baseline space-x-2 text-neutral-600 mb-1">
                                 <span className="font-mono-sf text-[11px] text-[#86868b]">Spoken:</span>
                                 <span>"{corr.original}"</span>
                             </div>
-                            <div className="flex items-baseline space-x-2 text-white mb-2">
+                            <div className="flex items-baseline space-x-2 text-[#1d1d1f] mb-2">
                                 <span className="font-mono-sf text-[11px] text-[#86868b]">Revision:</span>
-                                <span className="font-medium">{corr.corrected}</span>
+                                <span className="font-semibold">{corr.corrected}</span>
                             </div>
                             <div className="text-[#86868b] text-[11px] leading-relaxed">
                                 {corr.explanation}
@@ -1259,13 +1258,13 @@ function ResultsScreen({ evaluation, turns, topic, currentUserId, onPlayAgain, o
                 </div>
 
                 {/* 3 Personalized Improvement Suggestions */}
-                <div className="border-t border-white/[0.08] pt-5">
+                <div className="border-t border-black/[0.08] pt-5">
                     <div className="text-xs font-mono-sf text-[#86868b] uppercase tracking-wider mb-3">
                         Strategic Recommendations
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         {myEval.suggestions && myEval.suggestions.map((sug, idx) => (
-                            <div key={idx} className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs leading-relaxed text-neutral-300">
+                            <div key={idx} className="p-3.5 rounded-xl bg-black/[0.02] border border-black/[0.06] text-xs leading-relaxed text-[#1d1d1f]">
                                 <span className="font-mono-sf text-[#86868b] mr-1.5">{idx + 1}.</span>
                                 {sug}
                             </div>
@@ -1276,22 +1275,22 @@ function ResultsScreen({ evaluation, turns, topic, currentUserId, onPlayAgain, o
 
             {/* Spoken Speeches Transcript Accordion */}
             <div className="apple-glass-card p-6">
-                <h3 className="text-base font-semibold text-white tracking-tight mb-4">
+                <h3 className="text-base font-semibold text-[#1d1d1f] tracking-tight mb-4">
                     Debate Transcripts
                 </h3>
 
                 <div className="space-y-3">
                     {turns && turns.map((t, idx) => (
-                        <div key={idx} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                        <div key={idx} className="p-4 rounded-xl bg-black/[0.02] border border-black/[0.06]">
                             <div className="flex items-center justify-between text-xs font-mono-sf mb-2">
-                                <span className="text-white font-medium">
+                                <span className="text-[#1d1d1f] font-semibold">
                                     TURN 0{t.turn_index} · {t.turn_name}
                                 </span>
                                 <span className="text-[#86868b]">
                                     {t.speaker_key === 'player_a' ? pA.player_name : pB.player_name} ({t.speaker_side})
                                 </span>
                             </div>
-                            <p className="text-sm text-neutral-300 leading-relaxed font-normal">
+                            <p className="text-sm text-[#1d1d1f] leading-relaxed font-normal">
                                 {t.transcript}
                             </p>
                         </div>
@@ -1319,7 +1318,7 @@ function ResultsScreen({ evaluation, turns, topic, currentUserId, onPlayAgain, o
     );
 }
 
-// Subcomponent: Debater Score Card (Apple Style)
+// Subcomponent: Debater Score Card (Apple Light Mode)
 function DebaterScoreCard({ playerEval, isWinner, isCurrent, side }) {
     const eng = playerEval.english_proficiency;
     const deb = playerEval.debating_proficiency;
@@ -1327,42 +1326,42 @@ function DebaterScoreCard({ playerEval, isWinner, isCurrent, side }) {
     const db = playerEval.debate_breakdown || {};
 
     return (
-        <div className={`apple-glass-card p-6 ${isWinner ? 'border-white/30' : ''}`}>
+        <div className={`apple-glass-card p-6 ${isWinner ? 'border-black/30 shadow-md' : ''}`}>
             {/* Header */}
             <div className="flex items-center justify-between mb-5">
                 <div>
-                    <div className="text-base font-semibold text-white tracking-tight flex items-center space-x-2">
+                    <div className="text-base font-semibold text-[#1d1d1f] tracking-tight flex items-center space-x-2">
                         <span>{playerEval.player_name}</span>
-                        {isCurrent && <span className="text-[10px] text-neutral-400 font-mono-sf">(You)</span>}
-                        {isWinner && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white text-black font-semibold">Winner</span>}
+                        {isCurrent && <span className="text-[10px] text-[#86868b] font-mono-sf">(You)</span>}
+                        {isWinner && <span className="text-[10px] px-2 py-0.5 rounded-full bg-black text-white font-semibold">Winner</span>}
                     </div>
                     <div className="text-xs font-mono-sf text-[#86868b] mt-0.5">Side: {side}</div>
                 </div>
                 <div className="text-right">
                     <div className="text-[10px] font-mono-sf text-[#86868b]">COMPOSITE</div>
-                    <div className="text-lg font-semibold font-mono-sf text-white">{playerEval.composite_score}</div>
+                    <div className="text-lg font-semibold font-mono-sf text-[#1d1d1f]">{playerEval.composite_score}</div>
                 </div>
             </div>
 
             {/* Dual Hero Metric Numbers */}
             <div className="grid grid-cols-2 gap-3 mb-5">
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center">
+                <div className="p-3.5 rounded-xl bg-black/[0.02] border border-black/[0.06] text-center">
                     <div className="text-[11px] font-mono-sf text-[#86868b]">English Proficiency</div>
-                    <div className="text-3xl font-semibold tracking-tight text-white mt-1">{eng}</div>
+                    <div className="text-3xl font-semibold tracking-tight text-[#1d1d1f] mt-1">{eng}</div>
                     <div className="text-[10px] text-[#86868b] font-mono-sf">/ 100</div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center">
+                <div className="p-3.5 rounded-xl bg-black/[0.02] border border-black/[0.06] text-center">
                     <div className="text-[11px] font-mono-sf text-[#86868b]">Debating Proficiency</div>
-                    <div className="text-3xl font-semibold tracking-tight text-white mt-1">{deb}</div>
+                    <div className="text-3xl font-semibold tracking-tight text-[#1d1d1f] mt-1">{deb}</div>
                     <div className="text-[10px] text-[#86868b] font-mono-sf">/ 100</div>
                 </div>
             </div>
 
             {/* Mandatory Vocabulary Bonus */}
-            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] mb-5 flex items-center justify-between text-xs font-mono-sf">
+            <div className="p-3 rounded-xl bg-black/[0.02] border border-black/[0.06] mb-5 flex items-center justify-between text-xs font-mono-sf">
                 <span className="text-[#86868b]">Vocabulary Hints Used:</span>
-                <span className="text-white font-semibold">
+                <span className="text-[#1d1d1f] font-semibold">
                     +{playerEval.hints_used_count || 0} words ({eb.hint_bonus ? `+${eb.hint_bonus} pts` : '+0 pts'})
                 </span>
             </div>
@@ -1392,13 +1391,13 @@ function DebaterScoreCard({ playerEval, isWinner, isCurrent, side }) {
 function AppleScoreBar({ label, value }) {
     return (
         <div>
-            <div className="flex justify-between text-[11px] text-neutral-300 mb-1">
+            <div className="flex justify-between text-[11px] text-[#1d1d1f] mb-1">
                 <span>{label}</span>
                 <span className="font-mono-sf text-[#86868b]">{value}</span>
             </div>
-            <div className="w-full h-1 rounded-full bg-white/[0.08] overflow-hidden">
+            <div className="w-full h-1 rounded-full bg-black/[0.08] overflow-hidden">
                 <div
-                    className="h-full rounded-full bg-white transition-all duration-1000"
+                    className="h-full rounded-full bg-black transition-all duration-1000"
                     style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
                 ></div>
             </div>
@@ -1407,15 +1406,15 @@ function AppleScoreBar({ label, value }) {
 }
 
 // -------------------------------------------------------------
-// MODALS: LEADERBOARD & MATCH HISTORY (Apple Frosted Sheet)
+// MODALS: LEADERBOARD & MATCH HISTORY (Apple Frosted Sheet Light)
 // -------------------------------------------------------------
 function LeaderboardModal({ data, currentUserId, onClose }) {
     return (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-xl z-50 flex items-center justify-center p-4">
-            <div className="apple-glass p-6 rounded-3xl border border-white/10 max-w-xl w-full max-h-[80vh] flex flex-col">
-                <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
-                    <h2 className="text-base font-semibold text-white tracking-tight">Global Rankings</h2>
-                    <button onClick={onClose} className="text-[#86868b] hover:text-white text-sm">✕</button>
+        <div className="fixed inset-0 bg-black/25 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-white p-6 rounded-3xl border border-black/10 shadow-2xl max-w-xl w-full max-h-[80vh] flex flex-col">
+                <div className="flex items-center justify-between pb-4 border-b border-black/[0.08]">
+                    <h2 className="text-base font-semibold text-[#1d1d1f] tracking-tight">Global Rankings</h2>
+                    <button onClick={onClose} className="text-[#86868b] hover:text-[#1d1d1f] text-sm">✕</button>
                 </div>
 
                 <div className="overflow-y-auto flex-1 py-4 space-y-2">
@@ -1424,19 +1423,19 @@ function LeaderboardModal({ data, currentUserId, onClose }) {
                             key={user.id}
                             className={`p-3 rounded-xl flex items-center justify-between border ${
                                 user.id === currentUserId
-                                    ? 'bg-white/[0.06] border-white/20'
-                                    : 'bg-transparent border-white/[0.04]'
+                                    ? 'bg-black/[0.04] border-black/20'
+                                    : 'bg-transparent border-black/[0.04]'
                             }`}
                         >
                             <div className="flex items-center space-x-3">
                                 <span className="w-6 text-center font-mono-sf text-xs text-[#86868b]">
                                     #{idx + 1}
                                 </span>
-                                <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-xs font-semibold text-white">
+                                <div className="w-7 h-7 rounded-full bg-black text-white flex items-center justify-center text-xs font-semibold">
                                     {user.display_name.charAt(0)}
                                 </div>
                                 <div>
-                                    <div className="text-sm font-medium text-white">{user.display_name}</div>
+                                    <div className="text-sm font-medium text-[#1d1d1f]">{user.display_name}</div>
                                     <div className="text-[10px] text-[#86868b] font-mono-sf">
                                         {user.matches_won}W - {user.matches_lost}L
                                     </div>
@@ -1444,7 +1443,7 @@ function LeaderboardModal({ data, currentUserId, onClose }) {
                             </div>
 
                             <div className="text-right">
-                                <div className="text-sm font-semibold font-mono-sf text-white">{user.rating}</div>
+                                <div className="text-sm font-semibold font-mono-sf text-[#1d1d1f]">{user.rating}</div>
                                 <div className="text-[10px] text-[#86868b] font-mono-sf">
                                     Avg: {user.avg_english_score} Eng
                                 </div>
@@ -1459,11 +1458,11 @@ function LeaderboardModal({ data, currentUserId, onClose }) {
 
 function HistoryModal({ data, onClose }) {
     return (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-xl z-50 flex items-center justify-center p-4">
-            <div className="apple-glass p-6 rounded-3xl border border-white/10 max-w-xl w-full max-h-[80vh] flex flex-col">
-                <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
-                    <h2 className="text-base font-semibold text-white tracking-tight">Debate History</h2>
-                    <button onClick={onClose} className="text-[#86868b] hover:text-white text-sm">✕</button>
+        <div className="fixed inset-0 bg-black/25 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-white p-6 rounded-3xl border border-black/10 shadow-2xl max-w-xl w-full max-h-[80vh] flex flex-col">
+                <div className="flex items-center justify-between pb-4 border-b border-black/[0.08]">
+                    <h2 className="text-base font-semibold text-[#1d1d1f] tracking-tight">Debate History</h2>
+                    <button onClick={onClose} className="text-[#86868b] hover:text-[#1d1d1f] text-sm">✕</button>
                 </div>
 
                 <div className="overflow-y-auto flex-1 py-4 space-y-2.5">
@@ -1476,13 +1475,13 @@ function HistoryModal({ data, onClose }) {
                             let topicObj = {};
                             try { topicObj = JSON.parse(m.topic_json); } catch (e) {}
                             return (
-                                <div key={m.id || idx} className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs">
-                                    <div className="font-medium text-white mb-1">
+                                <div key={m.id || idx} className="p-3.5 rounded-xl bg-black/[0.02] border border-black/[0.06] text-xs">
+                                    <div className="font-medium text-[#1d1d1f] mb-1">
                                         "{topicObj.motion || 'Competitive Debate'}"
                                     </div>
                                     <div className="flex items-center justify-between text-[#86868b] font-mono-sf mt-2">
                                         <span>{m.player_a_name} vs {m.player_b_name}</span>
-                                        <span className="text-white font-semibold">
+                                        <span className="text-[#1d1d1f] font-semibold">
                                             {m.player_a_english_score}/{m.player_a_debate_score} - {m.player_b_english_score}/{m.player_b_debate_score}
                                         </span>
                                     </div>

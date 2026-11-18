@@ -196,14 +196,14 @@ class WebRTCVoiceManager {
                     barHeight = 4 + Math.sin(time + i * 0.4) * 3;
                 }
 
-                // Monochrome Apple-style gradient
+                // Apple Light Mode Monochrome gradient
                 const grad = ctx.createLinearGradient(0, height - barHeight, 0, height);
                 if (this.isMicTurnActive) {
-                    grad.addColorStop(0, '#ffffff');
-                    grad.addColorStop(1, '#8e8e93');
+                    grad.addColorStop(0, '#1d1d1f');
+                    grad.addColorStop(1, '#6e6e73');
                 } else {
-                    grad.addColorStop(0, '#2c2c2e');
-                    grad.addColorStop(1, '#1c1c1e');
+                    grad.addColorStop(0, '#d2d2d7');
+                    grad.addColorStop(1, '#e5e5ea');
                 }
 
                 ctx.fillStyle = grad;
