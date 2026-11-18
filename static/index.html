@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceDebate Arena · 1v1 Competitive Real-Time Debates</title>
+    <meta name="description" content="Real-time 1v1 competitive debating platform. Match with strangers, debate motions under time pressure, and receive AI evaluations for English and debating abilities.">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        arena: {
+                            bg: '#0a0b10',
+                            card: '#12141e',
+                            border: '#1f2335'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/custom.css">
+
+    <!-- React 18 & ReactDOM 18 CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel Standalone for JSX interpretation in browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-[#0a0b10] text-slate-100 antialiased min-h-screen">
+    <!-- React Root Container -->
+    <div id="root"></div>
+
+    <!-- Hidden Remote Audio Sink for WebRTC -->
+    <audio id="peer-remote-audio" autoplay></audio>
+
+    <!-- App Scripts -->
+    <script src="/static/js/audio_effects.js"></script>
+    <script src="/static/js/webrtc.js"></script>
+    <script src="/static/js/stt.js"></script>
+    <script type="text/babel" src="/static/js/app.js"></script>
+</body>
+</html>
