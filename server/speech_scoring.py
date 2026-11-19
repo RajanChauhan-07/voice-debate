@@ -161,6 +161,17 @@ def predict_speech_scores(
     syl_rate = features["syllables_per_sec"]
     ttr = features["type_token_ratio"]
 
+    # When no words or virtually no words are spoken, scores MUST be 0
+    if word_count < 2:
+        return {
+            "fluency_score": 0.0,
+            "pronunciation_score": 0.0,
+            "composite_speech_score": 0.0,
+            "cefr_level": "A0 (No Speech)",
+            "features": features,
+            "active_models_utilized": list(models.keys()) if models else ["baseline_calibrated_speechocean762"]
+        }
+
     # 1. Fluency Modeling (Speechocean762 calibrated regression)
     # Target ideal: 3.2-4.5 syllables/sec, pause ratio < 0.22
     fluency_base = 82.0
@@ -209,8 +220,10 @@ def predict_speech_scores(
         cefr = "B2 (Vantage / Upper Interm)"
     elif composite >= 50:
         cefr = "B1 (Intermediate)"
-    else:
+    elif composite > 0:
         cefr = "A2 (Elementary)"
+    else:
+        cefr = "A0 (No Speech)"
         
     return {
         "pronunciation_score": round(pron_score, 1),

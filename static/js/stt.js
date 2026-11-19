@@ -1,18 +1,31 @@
-// Real-Time Speech-to-Text via Web Speech API with fallback
+// Real-Time Speech-to-Text via Web Speech API with Mobile (iOS/Android) support
 class SpeechRecognitionManager {
     constructor(onTranscriptCallback) {
         this.onTranscript = onTranscriptCallback;
         this.recognition = null;
         this.isListening = false;
         this.isSupported = false;
+        this.hasUserInteracted = false;
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             this.isSupported = true;
-            this.recognition = new SpeechRecognition();
+            this._createRecognitionInstance(SpeechRecognition);
+        }
+    }
+
+    _createRecognitionInstance(SpeechRecognitionClass) {
+        try {
+            const SpeechRec = SpeechRecognitionClass || window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) return;
+
+            this.recognition = new SpeechRec();
+            // On mobile iOS Safari, continuous=true can cause silent aborts.
+            // Using continuous with automatic recovery provides optimal stability across mobile & desktop.
             this.recognition.continuous = true;
             this.recognition.interimResults = true;
             this.recognition.lang = 'en-US';
+            this.recognition.maxAlternatives = 1;
 
             this.recognition.onresult = (event) => {
                 let interimTranscript = '';
@@ -35,22 +48,33 @@ class SpeechRecognitionManager {
             };
 
             this.recognition.onerror = (event) => {
-                console.warn('[STT] Speech recognition warning/error:', event.error);
-                if (event.error === 'not-allowed') {
+                console.warn('[STT] Speech recognition event error:', event.error);
+                if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
                     this.isListening = false;
                 }
             };
 
             this.recognition.onend = () => {
-                // If turn is still active, automatically restart recognition
+                // If user's turn is still active, automatically restart recognition
                 if (this.isListening) {
                     try {
                         this.recognition.start();
                     } catch (e) {
-                        // Already started or busy
+                        // Might already be active or queued
                     }
                 }
             };
+        } catch (err) {
+            console.warn('[STT] Instance initialization error:', err);
+        }
+    }
+
+    // Warm up / request permission synchronously during user tap gesture
+    unlockMobilePermission() {
+        this.hasUserInteracted = true;
+        if (!this.recognition) {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRec) this._createRecognitionInstance(SpeechRec);
         }
     }
 
@@ -61,8 +85,16 @@ class SpeechRecognitionManager {
             this.recognition.start();
             return true;
         } catch (e) {
-            console.log('[STT] Start call exception:', e);
-            return false;
+            // If already started or reset required
+            try {
+                this.recognition.stop();
+                setTimeout(() => {
+                    if (this.isListening) {
+                        try { this.recognition.start(); } catch(err) {}
+                    }
+                }, 100);
+            } catch (err) {}
+            return true;
         }
     }
 

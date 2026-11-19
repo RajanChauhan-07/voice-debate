@@ -62,6 +62,63 @@ def rubric_evaluate_speech(
     full_text = " ".join([t.get("transcript", "") for t in transcripts]).strip()
     words = re.findall(r"\b[a-zA-Z']+\b", full_text)
     word_count = len(words)
+
+    # ZERO-SPEECH HANDLING: If user did not speak or spoke < 3 words, score is 0
+    if word_count < 3:
+        hint_checks = check_vocabulary_hints(full_text, mandatory_vocabulary)
+        return {
+            "player_id": player_id,
+            "player_name": player_name,
+            "side": side,
+            "english_proficiency": 0,
+            "debating_proficiency": 0,
+            "composite_score": 0.0,
+            "hint_checks": hint_checks,
+            "hints_used_count": 0,
+            "word_count": word_count,
+            "english_breakdown": {
+                "grammar": 0,
+                "vocabulary": 0,
+                "fluency": 0,
+                "clarity": 0,
+                "hint_bonus": 0
+            },
+            "debate_breakdown": {
+                "logical_reasoning": 0,
+                "argument_structure": 0,
+                "rebuttal_quality": 0,
+                "persuasiveness": 0,
+                "relevance": 0,
+                "closing_summary": 0
+            },
+            "speech_ml": {
+                "fluency_score": 0.0,
+                "pronunciation_score": 0.0,
+                "composite_speech_score": 0.0,
+                "cefr_level": "A0 (No Speech)",
+                "features": {
+                    "word_count": word_count,
+                    "syllables_per_sec": 0.0,
+                    "pause_ratio": 1.0,
+                    "type_token_ratio": 0.0,
+                    "speech_rate_wpm": 0.0
+                },
+                "active_models_utilized": []
+            },
+            "grammar_corrections": [
+                {
+                    "original": "No audible speech detected during assigned turns.",
+                    "corrected": "Speak clearly into your microphone to present your arguments.",
+                    "explanation": "Speech-to-text recorded 0 words for this speaker."
+                }
+            ],
+            "suggestions": [
+                "Ensure microphone permissions are granted before starting.",
+                "Speak immediately when your turn timer begins.",
+                "Deliver your motion / rebuttal clearly within the 45 seconds."
+            ]
+        }
+
     unique_words = len(set([w.lower() for w in words]))
     ttr = (unique_words / max(word_count, 1))
 
@@ -331,21 +388,28 @@ Evaluate each debater strictly and output valid JSON with this exact structure:
     comp_a = eval_a["composite_score"]
     comp_b = eval_b["composite_score"]
 
-    diff = comp_a - comp_b
-    if abs(diff) < 0.8:
+    # Special check: If both spoke 0 words / score 0, it's a void contest / inactive match
+    if comp_a == 0 and comp_b == 0:
         winner = None
         winner_id = None
-        winner_name = "Draw"
-    elif diff > 0:
-        winner = "player_a"
-        winner_id = player_a["id"]
-        winner_name = player_a["display_name"]
+        winner_name = "No Contest (No Speech Detected)"
+        delta_a, delta_b = 0, 0
     else:
-        winner = "player_b"
-        winner_id = player_b["id"]
-        winner_name = player_b["display_name"]
+        diff = comp_a - comp_b
+        if abs(diff) < 0.8:
+            winner = None
+            winner_id = None
+            winner_name = "Draw"
+        elif diff > 0:
+            winner = "player_a"
+            winner_id = player_a["id"]
+            winner_name = player_a["display_name"]
+        else:
+            winner = "player_b"
+            winner_id = player_b["id"]
+            winner_name = player_b["display_name"]
 
-    delta_a, delta_b = calculate_elo(player_a.get("rating", 1200), player_b.get("rating", 1200), winner)
+        delta_a, delta_b = calculate_elo(player_a.get("rating", 1200), player_b.get("rating", 1200), winner)
 
     return {
         "motion": motion,

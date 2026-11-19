@@ -34,6 +34,7 @@ function VoiceDebateApp() {
 
     // Screen State: 'LOBBY' | 'MATCHING' | 'MATCH_FOUND' | 'COIN_TOSS' | 'DEBATE' | 'EVALUATING' | 'RESULTS'
     const [screen, setScreen] = useState('LOBBY');
+    const [inactivityNotice, setInactivityNotice] = useState(null);
 
     // Modals
     const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -247,6 +248,13 @@ function VoiceDebateApp() {
                 }
                 break;
 
+            case 'match_terminated_inactivity':
+                if (webrtcRef.current) webrtcRef.current.setMicEnabled(false);
+                if (sttRef.current) sttRef.current.stopListening();
+                setInactivityNotice(data.message || 'Match terminated due to 5 seconds of silence.');
+                setScreen('TERMINATED_INACTIVITY');
+                break;
+
             case 'webrtc_offer':
                 if (webrtcRef.current && data.sender_id !== user.id) {
                     webrtcRef.current.handleRemoteOffer(data.payload);
@@ -283,6 +291,15 @@ function VoiceDebateApp() {
         };
         setUser(updatedUser);
         setShowNameModal(false);
+        setInactivityNotice(null);
+
+        // Immediate user-gesture microphone initialization (CRITICAL for mobile iOS/Android)
+        if (webrtcRef.current) {
+            webrtcRef.current.initMicrophone().catch(e => console.warn('[App] Mobile mic init error:', e));
+        }
+        if (sttRef.current) {
+            sttRef.current.unlockMobilePermission();
+        }
 
         window.soundFx.init();
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
@@ -518,6 +535,32 @@ function VoiceDebateApp() {
                         onPlayAgain={handleStartMatch}
                         onBackToLobby={() => setScreen('LOBBY')}
                     />
+                )}
+
+                {screen === 'TERMINATED_INACTIVITY' && (
+                    <div className="flex flex-col items-center justify-center py-16 text-center max-w-lg mx-auto">
+                        <div className="w-16 h-16 rounded-full bg-red-50 text-red-600 border border-red-200 flex items-center justify-center text-2xl font-bold mb-6">
+                            ⏱️
+                        </div>
+                        <h2 className="text-2xl md:text-3xl font-semibold text-[#1d1d1f] tracking-tight mb-3">
+                            Match Terminated
+                        </h2>
+                        <p className="text-sm md:text-base text-[#86868b] leading-relaxed mb-8">
+                            {inactivityNotice || 'Debater did not speak within the first 5 seconds of their turn.'}
+                        </p>
+                        <div className="p-4 rounded-xl bg-black/[0.03] border border-black/[0.06] text-xs font-mono-sf text-neutral-600 mb-8 w-full text-left">
+                            <span className="font-semibold text-neutral-800">Rule Enforced:</span> Active debaters must begin speaking within 5 seconds of their turn timer commencing to ensure fast-paced, live debate integrity.
+                        </div>
+                        <button
+                            onClick={() => {
+                                setInactivityNotice(null);
+                                setScreen('LOBBY');
+                            }}
+                            className="apple-btn-primary"
+                        >
+                            Return to Arena Lobby
+                        </button>
+                    </div>
                 )}
             </main>
 
