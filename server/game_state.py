@@ -155,7 +155,6 @@ class DebateRoom:
     async def _run_turn_timer(self):
         try:
             current_turn = self.turns[self.current_turn_idx]
-            active_player = self.player_a if current_turn.speaker_key == "player_a" else self.player_b
 
             while self.turn_time_remaining > 0 and self.is_active:
                 await asyncio.sleep(1.0)
@@ -172,27 +171,6 @@ class DebateRoom:
                     "turn_time_remaining": self.turn_time_remaining,
                     "total_debate_remaining": total_remaining
                 })
-
-                # 5-SECOND INACTIVITY RULE:
-                # If 5 seconds have elapsed and not a single word was spoken by the active debater,
-                # terminate the match for inactivity / non-participation (unless it's an AI bot turn).
-                elapsed_seconds = current_turn.duration - self.turn_time_remaining
-                is_human_turn = not (self.is_bot_match and current_turn.speaker_key == "player_b")
-
-                if elapsed_seconds >= 5 and is_human_turn:
-                    spoken_so_far = current_turn.transcript.strip()
-                    if len(spoken_so_far) == 0:
-                        print(f"[Match] Inactivity timeout: {active_player['display_name']} did not speak in first 5s of turn {current_turn.index}")
-                        self.is_active = False
-                        self.state = "TERMINATED_INACTIVITY"
-                        await self.broadcast_fn(self.room_id, {
-                            "type": "match_terminated_inactivity",
-                            "message": f"Match terminated: {active_player['display_name']} did not speak within the first 5 seconds of Turn {current_turn.index}.",
-                            "inactive_player_name": active_player["display_name"],
-                            "inactive_player_id": active_player["id"],
-                            "turn_index": current_turn.index
-                        })
-                        return
 
             if self.is_active:
                 await self.next_turn()
