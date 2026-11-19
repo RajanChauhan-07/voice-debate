@@ -1121,6 +1121,141 @@ for tip in results['pedagogical_feedback']:
 print("==================================================================")
 """)
 
+    # =========================================================================
+    # SECTION 12: SAVE MODELS & SERIALIZATION
+    # =========================================================================
+    add_md(r"""
+## 11. Model Serialization & Export (.pkl, .pth)
+
+Save all 3 trained models to disk:
+- **Model 1**: Scikit-Learn GBR and standard scaler saved via `joblib` (`.pkl`).
+- **Model 2**: PyTorch BiLSTM-Attention model weights and configuration saved via `torch.save` (`.pth`).
+- **Model 3**: PyTorch Speech Transformer weights and configuration saved via `torch.save` (`.pth`).
+""")
+
+    add_code(r"""
+import os
+import joblib
+
+# Create directory for model artifacts
+os.makedirs("saved_models", exist_ok=True)
+
+# 1. Save Model 1 (Scikit-Learn GBR & Feature Scaler) -> .pkl
+joblib.dump(model1_pron, "saved_models/model1_pronunciation_gbr.pkl")
+joblib.dump(model1_fluency, "saved_models/model1_fluency_gbr.pkl")
+joblib.dump(scaler_m1, "saved_models/scaler_m1.pkl")
+print("✅ Saved Model 1 (GBR) artifacts:")
+print("   • saved_models/model1_pronunciation_gbr.pkl")
+print("   • saved_models/model1_fluency_gbr.pkl")
+print("   • saved_models/scaler_m1.pkl")
+
+# 2. Save Model 2 (BiLSTM-Attention PyTorch Model) -> .pth
+torch.save({
+    'model_state_dict': model2.state_dict(),
+    'model_config': {'input_dim': 15, 'hidden_dim': 96, 'num_layers': 2},
+    'history': m2_history
+}, "saved_models/model2_bilstm_attention.pth")
+print("✅ Saved Model 2 (BiLSTM-Attention):")
+print("   • saved_models/model2_bilstm_attention.pth")
+
+# 3. Save Model 3 (Speech Transformer PyTorch Model) -> .pth
+torch.save({
+    'model_state_dict': model3.state_dict(),
+    'model_config': {'d_model': 96, 'nhead': 4, 'num_layers': 3},
+    'history': m3_history
+}, "saved_models/model3_speech_transformer.pth")
+print("✅ Saved Model 3 (Speech Transformer):")
+print("   • saved_models/model3_speech_transformer.pth")
+
+# Verification: Test reloading all models
+print("\n--- Verifying Model Reloading ---")
+loaded_m1_p = joblib.load("saved_models/model1_pronunciation_gbr.pkl")
+loaded_m2_checkpoint = torch.load("saved_models/model2_bilstm_attention.pth", map_location=DEVICE)
+loaded_m2 = BiLSTMAttentionAssessmentModel(**loaded_m2_checkpoint['model_config']).to(DEVICE)
+loaded_m2.load_state_dict(loaded_m2_checkpoint['model_state_dict'])
+loaded_m2.eval()
+
+loaded_m3_checkpoint = torch.load("saved_models/model3_speech_transformer.pth", map_location=DEVICE)
+loaded_m3 = SpeechTransformerAssessmentModel(**loaded_m3_checkpoint['model_config']).to(DEVICE)
+loaded_m3.load_state_dict(loaded_m3_checkpoint['model_state_dict'])
+loaded_m3.eval()
+
+print("🎯 Verification Successful: All 3 models reloaded and ready for production inference.")
+""")
+
+    # =========================================================================
+    # SECTION 13: CONFUSION MATRICES & HEATMAPS
+    # =========================================================================
+    add_md(r"""
+## 12. Confusion Matrices & Acoustic Correlation Heatmaps
+
+Visualizing CEFR grade classification agreements (A1–C2) and feature-to-score cross correlations.
+""")
+
+    add_code(r"""
+from sklearn.metrics import confusion_matrix, classification_report
+
+# CEFR Proficiency Score Bands (0-100 binned to 5 CEFR bands)
+bins = [0, 50, 65, 80, 90, 100]
+band_labels = ['A1/A2\n(Basic)', 'B1\n(Interm)', 'B2\n(Upper)', 'C1\n(Adv)', 'C2\n(Mastery)']
+
+def discretize_scores(scores):
+    return np.clip(np.digitize(scores, bins) - 1, 0, 4)
+
+y_true_bands_flu = discretize_scores(y_test_fluency)
+m1_pred_bands_flu = discretize_scores(preds_fluency_m1)
+m2_pred_bands_flu = discretize_scores(np.array(m2_f_preds))
+m3_pred_bands_flu = discretize_scores(np.array(m3_f_preds))
+
+# Compute Confusion Matrices
+cm1_flu = confusion_matrix(y_true_bands_flu, m1_pred_bands_flu, labels=range(5))
+cm2_flu = confusion_matrix(y_true_bands_flu, m2_pred_bands_flu, labels=range(5))
+cm3_flu = confusion_matrix(y_true_bands_flu, m3_pred_bands_flu, labels=range(5))
+
+# 1. Side-by-Side Confusion Matrix Heatmaps
+fig, axes = plt.subplots(1, 3, figsize=(18, 5.5))
+cms = [
+    (cm1_flu, "Model 1: Handcrafted GBR", "Blues"),
+    (cm2_flu, "Model 2: BiLSTM + Attention", "Greens"),
+    (cm3_flu, "Model 3: Speech Transformer", "Purples")
+]
+
+for ax, (cm, title, cmap) in zip(axes, cms):
+    cm_perc = cm.astype('float') / (cm.sum(axis=1)[:, np.newaxis] + 1e-10) * 100
+    annot = np.array([f"{count}\n({pct:.0f}%)" for count, pct in zip(cm.flatten(), cm_perc.flatten())]).reshape(cm.shape)
+    sns.heatmap(cm, annot=annot, fmt='', cmap=cmap, cbar=False, ax=ax,
+                xticklabels=band_labels, yticklabels=band_labels, linewidths=1, linecolor='white')
+    ax.set_title(f"{title}\nFluency Grade Confusion Matrix", fontsize=11, fontweight='bold', pad=12)
+    ax.set_xlabel("Predicted CEFR Band", fontsize=10, fontweight='semibold')
+    ax.set_ylabel("True Human CEFR Band", fontsize=10, fontweight='semibold')
+
+plt.tight_layout()
+plt.savefig("cefr_grade_confusion_matrices.png", dpi=200, bbox_inches='tight')
+plt.show()
+
+# 2. Multi-Feature Acoustic Correlation Heatmap
+plt.figure(figsize=(10, 7))
+corr_df = df_meta[['pronunciation_score', 'fluency_score', 'pause_ratio', 'articulation_rate', 'mean_f0_hz', 'f0_std_hz', 'duration_sec']].copy()
+corr_df.columns = ['Pron Score', 'Fluency Score', 'Pause Ratio', 'Articulation Rate', 'Mean Pitch (F0)', 'Pitch Std', 'Duration']
+corr_matrix = corr_df.corr(method='pearson')
+
+mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+cmap = sns.diverging_palette(220, 20, as_cmap=True)
+
+sns.heatmap(corr_matrix, mask=mask, cmap=cmap, vmin=-1.0, vmax=1.0, center=0,
+            annot=True, fmt=".2f", square=True, linewidths=.8, cbar_kws={"shrink": .8})
+plt.title("Acoustic & Prosodic Feature Correlation Heatmap", fontsize=12, fontweight='bold', pad=15)
+plt.tight_layout()
+plt.savefig("acoustic_correlation_heatmap.png", dpi=200, bbox_inches='tight')
+plt.show()
+
+# Classification Report
+print("=" * 65)
+print(" MODEL 3 (TRANSFORMER) CEFR CLASSIFICATION REPORT")
+print("=" * 65)
+print(classification_report(y_true_bands_flu, m3_pred_bands_flu, target_names=['A1/A2', 'B1', 'B2', 'C1', 'C2'], zero_division=0))
+""")
+
     # Save to file
     out_path = Path("Speech_Pronunciation_and_Fluency_Benchmarking.ipynb")
     with open(out_path, "w", encoding="utf-8") as f:
@@ -1130,3 +1265,4 @@ print("==================================================================")
 
 if __name__ == "__main__":
     create_notebook()
+

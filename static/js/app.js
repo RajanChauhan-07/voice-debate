@@ -19,10 +19,14 @@ function VoiceDebateApp() {
                 avatar_color: '#242426'
             };
         }
+        // Unique ID per device/browser session so phone and PC don't share identity
+        const randomId = 'usr-' + Math.random().toString(36).substring(2, 9);
+        const guestNames = ['Alex Chen', 'Sam Rivera', 'Taylor Vance', 'Morgan Reed', 'Casey Brooks'];
+        const randomName = guestNames[Math.floor(Math.random() * guestNames.length)];
         return {
-            id: 'usr-alex-chen',
-            username: 'alex_c',
-            display_name: 'Alex Chen',
+            id: randomId,
+            username: randomName.toLowerCase().replace(' ', '_'),
+            display_name: randomName,
             rating: 1200,
             avatar_color: '#2c2c2e'
         };
