@@ -9,6 +9,7 @@ load_dotenv(BASE_DIR / ".env")
 PORT = int(os.getenv("PORT", 8000))
 HOST = os.getenv("HOST", "0.0.0.0")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
 # Debate Timers (seconds)

@@ -50,8 +50,8 @@
     <!-- React Root Container -->
     <div id="root"></div>
 
-    <!-- Hidden Remote Audio Sink for WebRTC -->
-    <audio id="peer-remote-audio" autoplay></audio>
+    <!-- Remote Audio Sink for WebRTC P2P Voice -->
+    <audio id="peer-remote-audio" autoplay playsinline webkit-playsinline style="position:fixed;top:-100px;left:-100px;width:1px;height:1px;opacity:0.01;pointer-events:none;"></audio>
 
     <!-- App Scripts -->
     <script src="/static/js/audio_effects.js"></script>

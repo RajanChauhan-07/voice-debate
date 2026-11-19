@@ -3,7 +3,7 @@ import json
 import math
 import httpx
 from typing import Dict, Any, List, Optional
-from server.config import GEMINI_API_KEY, GROQ_API_KEY
+from server.config import GEMINI_API_KEY, GEMINI_MODEL, GROQ_API_KEY
 from server.speech_scoring import predict_speech_scores
 
 def calculate_elo(rating_a: int, rating_b: int, winner: Optional[str]) -> tuple[int, int]:
@@ -274,25 +274,34 @@ async def evaluate_debate(
         turns_b, turns_a, mandatory_vocabulary, motion
     )
 
-    # 2. If GEMINI_API_KEY is present, enhance with LLM insights
+    # 2. If GEMINI_API_KEY is present, enhance with Gemini LLM insights
     if GEMINI_API_KEY:
-        try:
-            async with httpx.AsyncClient(timeout=12.0) as client:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-                prompt = f"""
+        models_to_try = [GEMINI_MODEL, "gemini-3.5-flash", "gemini-2.5-flash", "gemini-flash-latest"]
+        eval_succeeded = False
+        for model_name in models_to_try:
+            if eval_succeeded:
+                break
+            try:
+                async with httpx.AsyncClient(timeout=20.0) as client:
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
+                    prompt = f"""
 You are the Chief Adjudicator of an international 1v1 competitive debate league.
 Debate Motion: "{motion}"
-Mandatory Vocabulary: {json.dumps(mandatory_vocabulary)}
+Mandatory Vocabulary to use: {json.dumps(mandatory_vocabulary)}
 
 Player A ({player_a['display_name']} - Side {player_a['side']}):
-Speeches:
+Speeches given in Turn 1 and Turn 3:
 {json.dumps([t.get('transcript', '') for t in turns_a])}
 
 Player B ({player_b['display_name']} - Side {player_b['side']}):
-Speeches:
+Speeches given in Turn 2 and Turn 4:
 {json.dumps([t.get('transcript', '') for t in turns_b])}
 
-Evaluate each debater strictly and output valid JSON with this exact structure:
+Analyze both debaters thoroughly based on what they actually argued and said.
+Provide rigorous, fair, and calibrated scoring (0 to 100).
+If a debater spoke meaningfully, score their English (Grammar, Vocabulary, Fluency, Clarity) and Debating (Logical Reasoning, Argument Structure, Rebuttal Clash, Persuasiveness).
+If a debater said nothing or under 3 words, score them 0.
+Output valid JSON ONLY with this exact structure:
 {{
   "player_a": {{
     "english_proficiency": <integer 0-100>,
@@ -312,9 +321,9 @@ Evaluate each debater strictly and output valid JSON with this exact structure:
       "closing_summary": <0-100>
     }},
     "grammar_corrections": [
-      {{"original": "quote", "corrected": "revision", "explanation": "why"}}
+      {{"original": "exact quote from Player A speech", "corrected": "polished scholarly revision", "explanation": "specific constructive rationale"}}
     ],
-    "suggestions": ["suggestion 1", "suggestion 2", "suggestion 3"]
+    "suggestions": ["specific actionable advice 1", "specific actionable advice 2", "specific actionable advice 3"]
   }},
   "player_b": {{
     "english_proficiency": <integer 0-100>,
@@ -334,55 +343,67 @@ Evaluate each debater strictly and output valid JSON with this exact structure:
       "closing_summary": <0-100>
     }},
     "grammar_corrections": [
-      {{"original": "quote", "corrected": "revision", "explanation": "why"}}
+      {{"original": "exact quote from Player B speech", "corrected": "polished scholarly revision", "explanation": "specific constructive rationale"}}
     ],
-    "suggestions": ["suggestion 1", "suggestion 2", "suggestion 3"]
+    "suggestions": ["specific actionable advice 1", "specific actionable advice 2", "specific actionable advice 3"]
   }}
 }}
 """
-                payload = {
-                    "contents": [{"parts": [{"text": prompt}]}],
-                    "generationConfig": {"response_mime_type": "application/json"}
-                }
-                resp = await client.post(url, json=payload)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
-                    llm_eval = json.loads(raw_text)
+                    payload = {
+                        "contents": [{"parts": [{"text": prompt}]}],
+                        "generationConfig": {"response_mime_type": "application/json"}
+                    }
+                    resp = await client.post(url, json=payload)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        raw_text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                        # Strip markdown if present
+                        if raw_text.startswith("```json"):
+                            raw_text = raw_text[7:]
+                        elif raw_text.startswith("```"):
+                            raw_text = raw_text[3:]
+                        if raw_text.endswith("```"):
+                            raw_text = raw_text[:-3]
+                        raw_text = raw_text.strip()
 
-                    # Merge LLM nuances while preserving deterministic hint checks and calculations
-                    for p_key, ev in [("player_a", eval_a), ("player_b", eval_b)]:
-                        if p_key in llm_eval:
-                            target = llm_eval[p_key]
-                            ev["english_breakdown"].update(target.get("english_breakdown", {}))
-                            ev["debate_breakdown"].update(target.get("debate_breakdown", {}))
-                            if target.get("grammar_corrections"):
-                                ev["grammar_corrections"] = target["grammar_corrections"]
-                            if target.get("suggestions"):
-                                ev["suggestions"] = target["suggestions"]
-                            # Recalculate weighted scores deterministically
-                            eb = ev["english_breakdown"]
-                            ev["english_proficiency"] = min(100, max(40, round(
-                                (0.30 * eb.get("grammar", 80)) +
-                                (0.25 * eb.get("vocabulary", 80)) +
-                                (0.20 * eb.get("fluency", 80)) +
-                                (0.15 * eb.get("clarity", 80)) +
-                                eb.get("hint_bonus", 0)
-                            )))
-                            db = ev["debate_breakdown"]
-                            ev["debating_proficiency"] = min(100, max(40, round(
-                                (0.25 * db.get("logical_reasoning", 80)) +
-                                (0.20 * db.get("argument_structure", 80)) +
-                                (0.20 * db.get("rebuttal_quality", 80)) +
-                                (0.15 * db.get("persuasiveness", 80)) +
-                                (0.10 * db.get("relevance", 80)) +
-                                (0.10 * db.get("closing_summary", 80))
-                            )))
-                            ev["composite_score"] = round(
-                                (ev["english_proficiency"] * 0.45) + (ev["debating_proficiency"] * 0.55), 1
-                            )
-        except Exception as e:
-            print(f"[Evaluation] Gemini evaluation fallback to rubric: {e}")
+                        llm_eval = json.loads(raw_text)
+
+                        # Merge LLM nuances while preserving deterministic hint checks and calculations
+                        for p_key, ev in [("player_a", eval_a), ("player_b", eval_b)]:
+                            if p_key in llm_eval:
+                                target = llm_eval[p_key]
+                                ev["english_breakdown"].update(target.get("english_breakdown", {}))
+                                ev["debate_breakdown"].update(target.get("debate_breakdown", {}))
+                                if target.get("grammar_corrections"):
+                                    ev["grammar_corrections"] = target["grammar_corrections"]
+                                if target.get("suggestions"):
+                                    ev["suggestions"] = target["suggestions"]
+                                # Recalculate weighted scores deterministically
+                                eb = ev["english_breakdown"]
+                                ev["english_proficiency"] = min(100, max(0, round(
+                                    (0.30 * eb.get("grammar", 80)) +
+                                    (0.25 * eb.get("vocabulary", 80)) +
+                                    (0.20 * eb.get("fluency", 80)) +
+                                    (0.15 * eb.get("clarity", 80)) +
+                                    eb.get("hint_bonus", 0)
+                                )))
+                                db = ev["debate_breakdown"]
+                                ev["debating_proficiency"] = min(100, max(0, round(
+                                    (0.25 * db.get("logical_reasoning", 80)) +
+                                    (0.20 * db.get("argument_structure", 80)) +
+                                    (0.20 * db.get("rebuttal_quality", 80)) +
+                                    (0.15 * db.get("persuasiveness", 80)) +
+                                    (0.10 * db.get("relevance", 80)) +
+                                    (0.10 * db.get("closing_summary", 80))
+                                )))
+                                ev["composite_score"] = round(
+                                    (ev["english_proficiency"] * 0.45) + (ev["debating_proficiency"] * 0.55), 1
+                                )
+                        eval_succeeded = True
+                        print(f"[Evaluation] Successfully evaluated debate using Gemini ({model_name}).")
+            except Exception as e:
+                print(f"[Evaluation] Gemini model {model_name} note: {e}")
+                continue
 
     # Determine winner deterministically
     comp_a = eval_a["composite_score"]

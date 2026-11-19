@@ -185,9 +185,15 @@ class DebateRoom:
         current_turn = self.turns[self.current_turn_idx]
         active_player = self.player_a if current_turn.speaker_key == "player_a" else self.player_b
 
-        # Verify caller is active speaker
+        # Verify caller is active speaker (or accept if user is either participant in room during this turn)
         if active_player["id"] != user_id:
-            return
+            # If user_id matches player_b during player_b's turn or player_a during player_a's turn
+            if (current_turn.speaker_key == "player_b" and self.player_b["id"] == user_id) or \
+               (current_turn.speaker_key == "player_a" and self.player_a["id"] == user_id):
+                pass
+            else:
+                print(f"[Transcript] Ignored update: turn {current_turn.index} speaker is {active_player['display_name']} ({active_player['id']}), but received from {user_id}")
+                return
 
         if is_final:
             current_turn.transcript = (current_turn.transcript + " " + text).strip()
@@ -195,15 +201,20 @@ class DebateRoom:
             # Interim live preview
             pass
 
-        # Check which mandatory vocabulary words were spoken
-        combined_text = current_turn.transcript + (" " + text if not is_final else "")
-        hints_status = check_vocabulary_hints(combined_text, self.mandatory_vocabulary)
+        # Check which mandatory vocabulary words were spoken by this player across their turns
+        player_speaker_key = current_turn.speaker_key
+        all_player_turns_text = " ".join([
+            t.transcript for t in self.turns if t.speaker_key == player_speaker_key
+        ]) + (" " + text if not is_final else "")
+
+        hints_status = check_vocabulary_hints(all_player_turns_text, self.mandatory_vocabulary)
 
         # Broadcast live transcript & hint updates to both debaters
         await self.broadcast_fn(self.room_id, {
             "type": "live_transcript",
             "turn_index": current_turn.index,
             "speaker_id": user_id,
+            "speaker_side": active_player["side"],
             "interim_text": text,
             "full_turn_transcript": current_turn.transcript,
             "is_final": is_final,

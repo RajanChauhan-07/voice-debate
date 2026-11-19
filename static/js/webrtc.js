@@ -11,6 +11,7 @@ class WebRTCVoiceManager {
         this.isMicTurnActive = false;
         this.visualizerCanvas = null;
         this.visualizerAnimationId = null;
+        this.queuedCandidates = [];
 
         this.rtcConfig = {
             iceServers: [
@@ -18,7 +19,8 @@ class WebRTCVoiceManager {
                 { urls: 'stun:stun1.l.google.com:19302' },
                 { urls: 'stun:stun2.l.google.com:19302' },
                 { urls: 'stun:stun3.l.google.com:19302' },
-                { urls: 'stun:stun4.l.google.com:19302' }
+                { urls: 'stun:stun4.l.google.com:19302' },
+                { urls: 'stun:global.stun.twilio.com:3478' }
             ]
         };
     }
@@ -36,6 +38,7 @@ class WebRTCVoiceManager {
                 video: false
             });
             this.isMicHardwareAvailable = true;
+            console.log('[WebRTC] Microphone permission granted. Tracks:', this.localStream.getAudioTracks().length);
 
             // Default mic state: MUTED until server explicitly activates turn!
             this.setMicEnabled(false);
@@ -55,6 +58,10 @@ class WebRTCVoiceManager {
             if (!AudioCtx || !this.localStream) return;
 
             this.audioContext = new AudioCtx();
+            // Resume AudioContext (required on mobile after user gesture)
+            if (this.audioContext.state === 'suspended') {
+                this.audioContext.resume();
+            }
             const source = this.audioContext.createMediaStreamSource(this.localStream);
             this.analyser = this.audioContext.createAnalyser();
             this.analyser.fftSize = 64;
@@ -71,6 +78,11 @@ class WebRTCVoiceManager {
             audioTracks.forEach(track => {
                 track.enabled = enabled;
             });
+            console.log(`[WebRTC] Mic ${enabled ? 'ENABLED' : 'MUTED'}. Tracks: ${audioTracks.length}`);
+        }
+        // Resume AudioContext on mobile if suspended
+        if (enabled && this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
         }
     }
 
@@ -81,6 +93,7 @@ class WebRTCVoiceManager {
                 el = document.createElement('audio');
                 el.id = 'peer-remote-audio';
                 el.autoplay = true;
+                el.playsInline = true;  // Critical for iOS
                 el.style.display = 'none';
                 document.body.appendChild(el);
             }
@@ -95,20 +108,37 @@ class WebRTCVoiceManager {
         }
 
         this.peerConnection = new RTCPeerConnection(this.rtcConfig);
+        console.log('[WebRTC] Created PeerConnection. isInitiator:', isInitiator);
 
         // Add local tracks if available
         if (this.localStream) {
             this.localStream.getAudioTracks().forEach(track => {
                 this.peerConnection.addTrack(track, this.localStream);
+                console.log('[WebRTC] Added local audio track:', track.label);
             });
         }
 
-        // Handle remote stream
+        // Handle remote stream — this receives the opponent's audio
         this.peerConnection.ontrack = (event) => {
+            console.log('[WebRTC] Received remote track:', event.track.kind, event.track.label);
             const audioEl = this.ensureRemoteAudioElement();
             if (audioEl && event.streams && event.streams[0]) {
                 audioEl.srcObject = event.streams[0];
-                audioEl.play().catch(e => console.log('[WebRTC] Autoplay waiting on user gesture:', e));
+                // Force play (critical for mobile)
+                const playPromise = audioEl.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => {
+                        console.log('[WebRTC] Autoplay blocked, will retry on user gesture:', e);
+                        // Retry play on next user interaction
+                        const retryPlay = () => {
+                            audioEl.play().catch(() => {});
+                            document.removeEventListener('click', retryPlay);
+                            document.removeEventListener('touchend', retryPlay);
+                        };
+                        document.addEventListener('click', retryPlay, { once: true });
+                        document.addEventListener('touchend', retryPlay, { once: true });
+                    });
+                }
             }
         };
 
@@ -119,6 +149,14 @@ class WebRTCVoiceManager {
             }
         };
 
+        this.peerConnection.oniceconnectionstatechange = () => {
+            console.log('[WebRTC] ICE state:', this.peerConnection.iceConnectionState);
+        };
+
+        this.peerConnection.onconnectionstatechange = () => {
+            console.log('[WebRTC] Connection state:', this.peerConnection.connectionState);
+        };
+
         if (isInitiator) {
             try {
                 const offer = await this.peerConnection.createOffer({
@@ -126,6 +164,7 @@ class WebRTCVoiceManager {
                 });
                 await this.peerConnection.setLocalDescription(offer);
                 this.sendSignal('webrtc_offer', offer);
+                console.log('[WebRTC] Created and sent offer.');
             } catch (err) {
                 console.error('[WebRTC] Error creating offer:', err);
             }
@@ -134,11 +173,28 @@ class WebRTCVoiceManager {
 
     async handleRemoteOffer(offer) {
         try {
+            // Initialize mic if not done yet
+            if (!this.localStream) {
+                await this.initMicrophone();
+            }
             await this.createPeerConnection(false);
             await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+            console.log('[WebRTC] Set remote offer description. Flushing queued candidates:', this.queuedCandidates.length);
+            
+            // Flush any queued ICE candidates
+            while (this.queuedCandidates.length > 0) {
+                const cand = this.queuedCandidates.shift();
+                try {
+                    await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+                } catch (e) {
+                    console.warn('[WebRTC] Error adding flushed candidate:', e);
+                }
+            }
+
             const answer = await this.peerConnection.createAnswer();
             await this.peerConnection.setLocalDescription(answer);
             this.sendSignal('webrtc_answer', answer);
+            console.log('[WebRTC] Handled offer, sent answer.');
         } catch (err) {
             console.error('[WebRTC] Error handling offer:', err);
         }
@@ -148,6 +204,17 @@ class WebRTCVoiceManager {
         try {
             if (this.peerConnection) {
                 await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                console.log('[WebRTC] Set remote answer description. Flushing queued candidates:', this.queuedCandidates.length);
+                
+                // Flush any queued ICE candidates
+                while (this.queuedCandidates.length > 0) {
+                    const cand = this.queuedCandidates.shift();
+                    try {
+                        await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+                    } catch (e) {
+                        console.warn('[WebRTC] Error adding flushed candidate:', e);
+                    }
+                }
             }
         } catch (err) {
             console.error('[WebRTC] Error handling answer:', err);
@@ -156,11 +223,25 @@ class WebRTCVoiceManager {
 
     async handleRemoteCandidate(candidate) {
         try {
-            if (this.peerConnection) {
+            if (this.peerConnection && this.peerConnection.remoteDescription && this.peerConnection.remoteDescription.type) {
                 await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                console.log('[WebRTC] Directly added remote ICE candidate');
+            } else {
+                console.log('[WebRTC] Remote description not set yet, queueing ICE candidate');
+                this.queuedCandidates.push(candidate);
             }
         } catch (err) {
             console.error('[WebRTC] Error adding ICE candidate:', err);
+        }
+    }
+
+    // Try to play remote audio (call on user interaction to bypass autoplay policy)
+    tryPlayRemoteAudio() {
+        if (this.remoteAudioEl && this.remoteAudioEl.srcObject) {
+            this.remoteAudioEl.play().catch(() => {});
+        }
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
         }
     }
 
@@ -245,4 +326,3 @@ class WebRTCVoiceManager {
         }
     }
 }
-

@@ -71,6 +71,10 @@ function VoiceDebateApp() {
     const webrtcRef = useRef(null);
     const sttRef = useRef(null);
     const visualizerCanvasRef = useRef(null);
+    // CRITICAL: Use a ref to always have the latest user.id in WebSocket callbacks
+    // Without this, closures capture a stale user.id and STT/transcripts fail for updated users
+    const userRef = useRef(user);
+    useEffect(() => { userRef.current = user; }, [user]);
 
     // Save user to local storage
     useEffect(() => {
@@ -118,10 +122,12 @@ function VoiceDebateApp() {
 
         // Initialize Speech Recognition Manager
         sttRef.current = new SpeechRecognitionManager((transcriptText, isFinal) => {
-            if (ws && ws.readyState === WebSocket.OPEN) {
+            // Use userRef.current to always get the LATEST user.id (not stale closure)
+            const currentUserId = userRef.current ? userRef.current.id : null;
+            if (ws && ws.readyState === WebSocket.OPEN && currentUserId) {
                 ws.send(JSON.stringify({
                     type: 'live_transcript',
-                    user_id: user.id,
+                    user_id: currentUserId,
                     text: transcriptText,
                     is_final: isFinal
                 }));
@@ -137,6 +143,8 @@ function VoiceDebateApp() {
 
     // Handle Server Events
     const handleServerMessage = (data) => {
+        // Always use the latest user via ref to avoid stale closures
+        const currentUser = userRef.current;
         switch (data.type) {
             case 'queue_joined':
                 setScreen('MATCHING');
@@ -155,8 +163,13 @@ function VoiceDebateApp() {
 
                 if (webrtcRef.current) {
                     webrtcRef.current.initMicrophone().then(() => {
-                        const isInitiator = data.player_a.id === user.id;
-                        webrtcRef.current.createPeerConnection(isInitiator);
+                        const isInitiator = data.player_a.id === currentUser.id;
+                        if (isInitiator) {
+                            console.log('[WebRTC] Initiating offer as Player A');
+                            webrtcRef.current.createPeerConnection(true);
+                        } else {
+                            console.log('[WebRTC] Standing by to receive offer as Player B');
+                        }
                     });
                 }
                 break;
@@ -186,9 +199,14 @@ function VoiceDebateApp() {
 
                 window.soundFx.playTurnGong();
 
-                const isMyTurn = data.mic_enabled_user_id === user.id;
+                const isMyTurn = data.mic_enabled_user_id === currentUser.id;
+                console.log(`[Turn Start] Turn ${data.turn_index}: Speaker is ${data.speaker_name} (${data.speaker_side}). isMyTurn=${isMyTurn}`);
+
                 if (webrtcRef.current) {
                     webrtcRef.current.setMicEnabled(isMyTurn);
+                    if (!isMyTurn) {
+                        webrtcRef.current.tryPlayRemoteAudio();
+                    }
                 }
 
                 if (sttRef.current) {
@@ -248,19 +266,19 @@ function VoiceDebateApp() {
                 break;
 
             case 'webrtc_offer':
-                if (webrtcRef.current && data.sender_id !== user.id) {
+                if (webrtcRef.current && data.sender_id !== currentUser.id) {
                     webrtcRef.current.handleRemoteOffer(data.payload);
                 }
                 break;
 
             case 'webrtc_answer':
-                if (webrtcRef.current && data.sender_id !== user.id) {
+                if (webrtcRef.current && data.sender_id !== currentUser.id) {
                     webrtcRef.current.handleRemoteAnswer(data.payload);
                 }
                 break;
 
             case 'webrtc_ice_candidate':
-                if (webrtcRef.current && data.sender_id !== user.id) {
+                if (webrtcRef.current && data.sender_id !== currentUser.id) {
                     webrtcRef.current.handleRemoteCandidate(data.payload);
                 }
                 break;
@@ -1026,10 +1044,21 @@ function DebateArenaScreen({
             <div className="apple-glass-card p-3">
                 <div className="flex items-center justify-between text-xs font-mono-sf text-[#86868b] mb-2 px-1">
                     <span className="flex items-center space-x-2">
-                        <span className={`w-1.5 h-1.5 rounded-full ${isMyTurn ? 'bg-black' : 'bg-neutral-400'}`}></span>
-                        <span>{isMyTurn ? 'Your Audio Input' : "Opponent's Live Audio"}</span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isMyTurn ? 'bg-black' : 'bg-green-600 animate-pulse'}`}></span>
+                        <span>{isMyTurn ? 'Your Audio Input (Speaking)' : "Opponent's Audio Stream (Listening)"}</span>
                     </span>
-                    <span className="text-[10px] text-[#86868b] font-mono-sf">Opus 48kHz</span>
+                    <button
+                        onClick={() => {
+                            const el = document.getElementById('peer-remote-audio');
+                            if (el) {
+                                el.muted = false;
+                                el.play().catch(e => console.log('Audio test:', e));
+                            }
+                        }}
+                        className="text-[10px] text-[#1d1d1f] hover:underline font-mono-sf bg-black/5 px-2 py-0.5 rounded-full"
+                    >
+                        🔊 Test Opponent Audio
+                    </button>
                 </div>
                 <canvas ref={visualizerCanvasRef} width={800} height={46} className="waveform-canvas" />
             </div>
@@ -1038,7 +1067,7 @@ function DebateArenaScreen({
             <div className="apple-glass-card p-4">
                 <div className="flex items-center justify-between mb-2.5 px-1">
                     <span className="text-xs font-mono-sf text-[#86868b] uppercase tracking-wider">
-                        Vocabulary Hints
+                        Vocabulary Hints ({currentTurn ? currentTurn.speaker_side : 'Debate'})
                     </span>
                     <span className="text-xs font-mono-sf text-[#1d1d1f] font-medium">
                         Used: {hintsStatus.filter(h => h.used).length} / {hintsStatus.length}
@@ -1067,7 +1096,7 @@ function DebateArenaScreen({
             <div className="apple-glass-card p-5">
                 <div className="flex items-center justify-between mb-3 text-xs font-mono-sf text-[#86868b]">
                     <span>Live Speech Recognition</span>
-                    <span>{isMyTurn ? 'Active Input' : 'Incoming Stream'}</span>
+                    <span>{isMyTurn ? '🎙️ Your Turn · Transcribing' : `🎧 Listening to ${activePlayer ? activePlayer.display_name : 'Opponent'}`}</span>
                 </div>
 
                 <div className="min-h-[80px] p-4 rounded-xl bg-black/[0.02] border border-black/[0.06] text-[#1d1d1f] text-sm leading-relaxed font-normal">
@@ -1089,7 +1118,7 @@ function DebateArenaScreen({
                     ) : (
                         <span className="text-[#86868b] italic">
                             {isMyTurn
-                                ? 'Speak into your microphone... Spoken words will transcribe in real time.'
+                                ? 'Speak into your microphone... Spoken words transcribe in real time.'
                                 : `Listening to ${activePlayer ? activePlayer.display_name : 'opponent'}...`}
                         </span>
                     )}
@@ -1310,26 +1339,40 @@ function ResultsScreen({ evaluation, turns, topic, currentUserId, onPlayAgain, o
 
             {/* Spoken Speeches Transcript Accordion */}
             <div className="apple-glass-card p-6">
-                <h3 className="text-base font-semibold text-[#1d1d1f] tracking-tight mb-4">
-                    Debate Transcripts
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base font-semibold text-[#1d1d1f] tracking-tight">
+                        Complete Debate Transcripts
+                    </h3>
+                    <span className="text-xs font-mono-sf text-[#86868b]">All 4 Spoken Turns</span>
+                </div>
 
-                <div className="space-y-3">
-                    {turns && turns.map((t, idx) => (
-                        <div key={idx} className="p-4 rounded-xl bg-black/[0.02] border border-black/[0.06]">
-                            <div className="flex items-center justify-between text-xs font-mono-sf mb-2">
-                                <span className="text-[#1d1d1f] font-semibold">
-                                    TURN 0{t.turn_index} · {t.turn_name}
-                                </span>
-                                <span className="text-[#86868b]">
-                                    {t.speaker_key === 'player_a' ? pA.player_name : pB.player_name} ({t.speaker_side})
-                                </span>
+                <div className="space-y-4">
+                    {turns && turns.map((t, idx) => {
+                        const wordsSpoken = t.transcript ? t.transcript.trim().split(/\s+/).filter(Boolean).length : 0;
+                        const speakerName = t.speaker_key === 'player_a' ? pA.player_name : pB.player_name;
+                        return (
+                            <div key={idx} className="p-4 rounded-2xl bg-black/[0.02] border border-black/[0.06]">
+                                <div className="flex items-center justify-between text-xs font-mono-sf mb-2">
+                                    <span className="text-[#1d1d1f] font-semibold flex items-center space-x-2">
+                                        <span>TURN 0{t.turn_index} · {t.turn_name}</span>
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${t.speaker_side === 'FOR' ? 'bg-black text-white' : 'bg-neutral-200 text-neutral-800'}`}>
+                                            {t.speaker_side}
+                                        </span>
+                                    </span>
+                                    <span className="text-[#86868b] font-medium">
+                                        {speakerName} · {wordsSpoken} words
+                                    </span>
+                                </div>
+                                <p className="text-sm text-[#1d1d1f] leading-relaxed font-normal whitespace-pre-wrap">
+                                    {t.transcript && t.transcript.trim().length > 0 ? (
+                                        t.transcript
+                                    ) : (
+                                        <span className="text-[#86868b] italic">[No speech recorded for this turn]</span>
+                                    )}
+                                </p>
                             </div>
-                            <p className="text-sm text-[#1d1d1f] leading-relaxed font-normal">
-                                {t.transcript}
-                            </p>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
 
