@@ -38,6 +38,9 @@ function VoiceDebateApp() {
     // Modals
     const [showLeaderboard, setShowLeaderboard] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
+    const [showNameModal, setShowNameModal] = useState(false);
+    const [nameInput, setNameInput] = useState(user.display_name || '');
+    const [pendingAction, setPendingAction] = useState('match'); // 'match' or 'practice'
     const [leaderboardData, setLeaderboardData] = useState([]);
     const [historyData, setHistoryData] = useState([]);
 
@@ -266,11 +269,26 @@ function VoiceDebateApp() {
 
     // UI Actions
     const handleStartMatch = () => {
+        setPendingAction('match');
+        setNameInput(user.display_name || '');
+        setShowNameModal(true);
+    };
+
+    const handleConfirmNameAndProceed = (confirmedName) => {
+        const finalName = confirmedName && confirmedName.trim().length > 0 ? confirmedName.trim() : user.display_name;
+        const updatedUser = {
+            ...user,
+            display_name: finalName,
+            username: finalName.toLowerCase().replace(/\s+/g, '_')
+        };
+        setUser(updatedUser);
+        setShowNameModal(false);
+
         window.soundFx.init();
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             socketRef.current.send(JSON.stringify({
-                type: 'join_queue',
-                user: user
+                type: pendingAction === 'practice' ? 'start_practice' : 'join_queue',
+                user: updatedUser
             }));
         }
     };
@@ -286,13 +304,9 @@ function VoiceDebateApp() {
     };
 
     const handleStartPractice = () => {
-        window.soundFx.init();
-        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-            socketRef.current.send(JSON.stringify({
-                type: 'start_practice',
-                user: user
-            }));
-        }
+        setPendingAction('practice');
+        setNameInput(user.display_name || '');
+        setShowNameModal(true);
     };
 
     const handleDevSkipTurn = () => {
@@ -508,6 +522,15 @@ function VoiceDebateApp() {
             </main>
 
             {/* Modals */}
+            {showNameModal && (
+                <NamePromptModal
+                    currentName={nameInput}
+                    onChange={setNameInput}
+                    onConfirm={() => handleConfirmNameAndProceed(nameInput)}
+                    onClose={() => setShowNameModal(false)}
+                />
+            )}
+
             {showLeaderboard && (
                 <LeaderboardModal
                     data={leaderboardData}
@@ -1504,6 +1527,63 @@ function HistoryModal({ data, onClose }) {
                             );
                         })
                     )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Name Prompt Modal (Asks for debater's name before starting)
+function NamePromptModal({ currentName, onChange, onConfirm, onClose }) {
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            onConfirm();
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/35 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-white p-7 rounded-3xl border border-black/10 shadow-2xl max-w-sm w-full text-center">
+                <div className="w-12 h-12 rounded-full bg-black text-white mx-auto mb-4 flex items-center justify-center font-bold text-lg shadow-sm">
+                    🎙️
+                </div>
+                <h3 className="text-xl font-semibold tracking-tight text-[#1d1d1f] mb-1">
+                    Enter Your Debater Name
+                </h3>
+                <p className="text-xs text-[#86868b] mb-6">
+                    This name will appear on the 1v1 arena, live speech transcript, and official score report.
+                </p>
+
+                <div className="mb-5 text-left">
+                    <label className="text-[11px] font-mono-sf uppercase text-[#86868b] block mb-1.5 ml-1">
+                        Display Name
+                    </label>
+                    <input
+                        type="text"
+                        value={currentName}
+                        onChange={(e) => onChange(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="e.g. Alex, Jordan, Sarah..."
+                        autoFocus
+                        maxLength={24}
+                        className="w-full px-4 py-3 rounded-2xl bg-black/[0.04] border border-black/10 text-[#1d1d1f] placeholder:text-[#86868b] font-medium text-sm focus:outline-none focus:border-black/30 focus:bg-white transition"
+                    />
+                </div>
+
+                <div className="flex items-center space-x-2.5">
+                    <button
+                        onClick={onClose}
+                        className="apple-btn-secondary !w-1/3 !py-2.5 !text-xs !text-[#86868b] hover:!text-[#1d1d1f]"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        className="apple-btn-primary !w-2/3 !py-2.5 !text-sm shadow-md"
+                    >
+                        Join Match →
+                    </button>
                 </div>
             </div>
         </div>
